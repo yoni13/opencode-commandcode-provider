@@ -5,6 +5,10 @@
   "type": "module",
   "main": "index.ts",
   "types": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./server": "./plugin.ts"
+  },
   "files": ["index.ts", "src/"],
   "license": "MIT",
   "peerDependencies": {
