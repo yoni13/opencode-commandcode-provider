@@ -128,7 +128,7 @@ test("doStream throws descriptive error on non-OK response", async () => {
 
 test("doStream throws on HTTP error without JSON body", async () => {
   const { restore } = mockFetchError(500, "Internal Server Error")
-  const model = makeModel()
+  const model = new CommandCodeLanguageModel(MODEL_ID, { apiKey: API_KEY, maxRetries: 0 })
   expect(model.doStream(makeCallOptions())).rejects.toThrow("Command Code API error: 500 Internal Server Error")
   restore()
 })
@@ -221,7 +221,7 @@ test("doStream includes model ID in error messages", async () => {
   const { restore } = mockFetchError(500, "Server Error", JSON.stringify({
     error: { message: "Something broke" },
   }))
-  const model = makeModel()
+  const model = new CommandCodeLanguageModel(MODEL_ID, { apiKey: API_KEY, maxRetries: 0 })
   try {
     await model.doStream(makeCallOptions())
     expect.unreachable("Should have thrown")

@@ -7,7 +7,11 @@
     "commandcode": {
       "npm": "commandcode-go-opencode-provider",
       "name": "Command Code",
-      "env": ["COMMANDCODE_API_KEY"]
+      "env": ["COMMANDCODE_API_KEY"],
+      "options": {
+        "maxRetries": 5,
+        "retryDelayMs": 2000
+      }
     }
   }
 }

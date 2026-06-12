@@ -6,6 +6,8 @@ export interface CommandCodeProviderOptions {
   apiKey?: string
   baseURL?: string
   headers?: Record<string, string>
+  maxRetries?: number
+  retryDelayMs?: number
 }
 
 export function createCommandCode(options: CommandCodeProviderOptions = {}) {
@@ -22,6 +24,8 @@ export function createCommandCode(options: CommandCodeProviderOptions = {}) {
         apiKey,
         baseURL: typeof options.baseURL === "string" ? options.baseURL : undefined,
         headers: typeof options.headers === "object" && options.headers !== null ? options.headers as Record<string, string> : undefined,
+        maxRetries: options.maxRetries,
+        retryDelayMs: options.retryDelayMs,
       })
     },
   }

@@ -14,10 +14,14 @@ const DEFAULT_BASE_URL = "https://api.commandcode.ai"
 // x-command-code-version must match the Command Code CLI version for API compatibility
 const CC_VERSION = "0.26.20"
 
+const RETRYABLE_STATUSES = new Set([408, 429, 500, 502, 503, 504])
+
 export interface CommandCodeModelOptions {
   apiKey: string
   baseURL?: string
   headers?: Record<string, string>
+  maxRetries?: number
+  retryDelayMs?: number
 }
 
 export class CommandCodeLanguageModel implements LanguageModelV3 {
@@ -48,54 +52,98 @@ export class CommandCodeLanguageModel implements LanguageModelV3 {
     }
   }
 
+  private async fetchWithRetry(requestBody: string, abortSignal: AbortSignal): Promise<Response> {
+    const maxRetries = this.opts.maxRetries ?? 3
+    const retryDelayMs = this.opts.retryDelayMs ?? 1000
+    let lastError: unknown
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const controller = new AbortController()
+        const timeoutMs = 300_000 + attempt * 60_000
+        const timeout = setTimeout(() => controller.abort(new Error("Request timed out after 5 minutes")), timeoutMs)
+
+        const onAbort = () => controller.abort(abortSignal.reason)
+        abortSignal.addEventListener("abort", onAbort, { once: true })
+
+        try {
+          const response = await fetch(`${this.baseURL}/alpha/generate`, {
+            method: "POST",
+            headers: this.buildHeaders(),
+            body: requestBody,
+            signal: controller.signal,
+          })
+
+          if (!response.ok && RETRYABLE_STATUSES.has(response.status) && attempt < maxRetries) {
+            const delay = retryDelayMs * Math.pow(2, attempt)
+            console.warn(`Command Code API ${response.status}, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`)
+            await new Promise((r) => setTimeout(r, delay))
+            continue
+          }
+
+          if (!response.ok) {
+            const errorBody = await response.text().catch(() => "")
+            let errorMessage = `Command Code API error: ${response.status} ${response.statusText}`
+            try {
+              const parsed = JSON.parse(errorBody)
+              if (parsed.error?.message) errorMessage = parsed.error.message
+              else if (parsed.message) errorMessage = parsed.message
+            } catch {
+              // intentionally silent: error body is not JSON
+            }
+            throw new Error(`${errorMessage} [model=${this.modelId}]`)
+          }
+
+          return response
+        } finally {
+          clearTimeout(timeout)
+          abortSignal.removeEventListener("abort", onAbort)
+        }
+      } catch (err) {
+        lastError = err
+        const isAbort = err instanceof DOMException || (err instanceof Error && err.name === "AbortError")
+
+        if (isAbort && attempt < maxRetries) {
+          const delay = retryDelayMs * Math.pow(2, attempt)
+          console.warn(`Command Code request aborted, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`)
+          await new Promise((r) => setTimeout(r, delay))
+          continue
+        }
+
+        if (isAbort) throw err
+        if (attempt >= maxRetries) throw err
+      }
+    }
+
+    throw lastError
+  }
+
   async doStream(options: LanguageModelV3CallOptions): Promise<LanguageModelV3StreamResult> {
     const body = buildRequest(this.modelId, options)
     const requestBody = JSON.stringify(body)
 
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(new Error("Request timed out after 5 minutes")), 300_000)
     const userSignal = options.abortSignal
     if (userSignal) {
       const onAbort = () => controller.abort(userSignal.reason)
       userSignal.addEventListener("abort", onAbort, { once: true })
     }
 
-    try {
-      const response = await fetch(`${this.baseURL}/alpha/generate`, {
-        method: "POST",
-        headers: this.buildHeaders(),
-        body: requestBody,
-        signal: controller.signal,
-      })
+    const response = await this.fetchWithRetry(requestBody, controller.signal)
 
-      if (!response.ok) {
-        const errorBody = await response.text().catch(() => "")
-        let errorMessage = `Command Code API error: ${response.status} ${response.statusText}`
-        try {
-          const parsed = JSON.parse(errorBody)
-          if (parsed.error?.message) errorMessage = parsed.error.message
-          else if (parsed.message) errorMessage = parsed.message
-        } catch {
-          // intentionally silent: error body is not JSON
-        }        throw new Error(`${errorMessage} [model=${this.modelId}]`)
-      }
+    if (!response.body) {
+      throw new Error(`Command Code API returned no body [model=${this.modelId}]`)
+    }
 
-      if (!response.body) {
-        throw new Error(`Command Code API returned no body [model=${this.modelId}]`)
-      }
+    const responseHeaders: Record<string, string> = {}
+    response.headers.forEach((v, k) => {
+      responseHeaders[k] = v
+    })
 
-      const responseHeaders: Record<string, string> = {}
-      response.headers.forEach((v, k) => {
-        responseHeaders[k] = v
-      })
-
-      return {
-        stream: parseStreamEvents(response.body as ReadableStream<Uint8Array>),
-        request: { body: requestBody },
-        response: { headers: responseHeaders },
-      }
-    } finally {
-      clearTimeout(timeout)
+    return {
+      stream: parseStreamEvents(response.body as ReadableStream<Uint8Array>),
+      request: { body: requestBody },
+      response: { headers: responseHeaders },
     }
   }
 
