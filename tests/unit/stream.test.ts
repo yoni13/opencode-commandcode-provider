@@ -166,6 +166,28 @@ test("handles error events", async () => {
   expect(parts[0]).toMatchObject({ type: "error", error: "Something broke" })
 })
 
+test("handles server_error events", async () => {
+  const body = streamFromChunks([
+    sseEvent({
+      type: "server_error",
+      message: "Network connection lost.",
+      statusCode: 503,
+      isRetryable: true,
+    }),
+  ])
+  const stream = parseStreamEvents(body)
+  const parts = await collectStream(stream)
+  expect(parts[0]).toMatchObject({
+    type: "error",
+    error: {
+      type: "server_error",
+      message: "Network connection lost.",
+      statusCode: 503,
+      isRetryable: true,
+    },
+  })
+})
+
 test("handles response-metadata event", async () => {
   const body = streamFromChunks([sseEvent({ type: "response-metadata", id: "req-1", modelId: "model-v1" })])
   const stream = parseStreamEvents(body)

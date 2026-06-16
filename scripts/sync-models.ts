@@ -8,6 +8,7 @@ const MODELS_JSON = join(PROJECT_ROOT, "models.json")
 const GLOBAL_CONFIG = join(homedir(), ".config", "opencode", "opencode.jsonc")
 const NPM_PACKAGE = "command-code"
 const TMP_DIR = join("/tmp", "cc-model-sync")
+const MODELS_PAGE = "https://commandcode.ai/models"
 
 interface ModelEntry {
   id: string
@@ -37,9 +38,17 @@ interface SnEntry {
   label: string
   name: string
   description: string
+  badge?: string
   reasoning?: boolean
   reasoningEfforts?: string[]
   contextWindow?: number
+}
+
+interface SiteCostEntry {
+  title: string
+  input: number
+  output: number
+  cache_read?: number
 }
 
 const FALLBACK_COSTS: Record<string, { input: number; output: number; cache_read?: number; cache_write?: number }> = {
@@ -70,6 +79,7 @@ const FALLBACK_LIMITS: Record<string, { context: number; output: number }> = {
   "zai-org/GLM-5.1": { context: 200000, output: 131072 },
   "MiniMaxAI/MiniMax-M2.5": { context: 1000000, output: 131072 },
   "MiniMaxAI/MiniMax-M2.7": { context: 1000000, output: 131072 },
+  "MiniMaxAI/MiniMax-M3-Free": { context: 1000000, output: 131072 },
   "deepseek/deepseek-v4-pro": { context: 1000000, output: 384000 },
   "deepseek/deepseek-v4-flash": { context: 1000000, output: 384000 },
   "Qwen/Qwen3.6-Max-Preview": { context: 1000000, output: 131072 },
@@ -99,6 +109,31 @@ const TIER_MAP: Record<string, "premium" | "open-source"> = {
   "vercel-ai-gateway": "open-source",
   "openrouter": "open-source",
   "cloudflare-ai-gateway": "open-source",
+}
+
+const PREMIUM_MODEL_PREFIXES = [
+  "google/",
+]
+
+function getModelTier(entry: SnEntry): "premium" | "open-source" {
+  if (PREMIUM_MODEL_PREFIXES.some((prefix) => entry.id.startsWith(prefix))) {
+    return "premium"
+  }
+
+  const provider = entry.provider || "unknown"
+  return TIER_MAP[provider] ?? "open-source"
+}
+
+function getDisplayName(entry: SnEntry, tier: "premium" | "open-source"): string {
+  if (tier !== "premium" || entry.name.startsWith("[Premium] ")) {
+    if (entry.badge === "free" && !entry.name.startsWith("[Free] ")) {
+      return `[Free] ${entry.name}`
+    }
+
+    return entry.name
+  }
+
+  return `[Premium] ${entry.name}`
 }
 
 async function fetchLatestBundle(): Promise<{ source: string; version: string }> {
@@ -131,6 +166,92 @@ async function fetchLatestBundle(): Promise<{ source: string; version: string }>
   rmSync(TMP_DIR, { recursive: true, force: true })
 
   return { source, version }
+}
+
+function findBalancedAt(source: string, braceStart: number): string {
+  let depth = 0
+  let inString = false
+  let escaped = false
+  let end = braceStart
+
+  for (; end < source.length; end++) {
+    const ch = source[end]
+    if (inString) {
+      if (escaped) escaped = false
+      else if (ch === "\\") escaped = true
+      else if (ch === "\"") inString = false
+      continue
+    }
+
+    if (ch === "\"") {
+      inString = true
+    } else if (ch === "{") {
+      depth++
+    } else if (ch === "}") {
+      depth--
+      if (depth === 0) break
+    }
+  }
+
+  return source.slice(braceStart, end + 1)
+}
+
+function parseSiteCostsFromBundle(source: string): Map<string, SiteCostEntry> {
+  const costs = new Map<string, SiteCostEntry>()
+  const routeEntry = /"([a-z0-9-]+)":\{/g
+  let match: RegExpExecArray | null
+
+  while ((match = routeEntry.exec(source)) !== null) {
+    const slug = match[1]
+    const objectSource = findBalancedAt(source, routeEntry.lastIndex - 1)
+    if (!objectSource.includes("tldrStats") || !objectSource.includes('label:"Input"')) continue
+
+    const title = objectSource.match(/title:"([^"]+)"/)?.[1]
+    const input = objectSource.match(/label:"Input",value:"\$?([0-9.]+)"/)?.[1]
+    const output = objectSource.match(/label:"Output",value:"\$?([0-9.]+)"/)?.[1]
+    if (!title || !input || !output) continue
+
+    const cacheRead = objectSource.match(/label:"Cache read",value:"\$?([0-9.]+)"/)?.[1]
+    const entry: SiteCostEntry = {
+      title,
+      input: Number(input),
+      output: Number(output),
+    }
+    if (cacheRead) entry.cache_read = Number(cacheRead)
+
+    costs.set(`slug:${slug}`, entry)
+    costs.set(`title:${title.toLowerCase()}`, entry)
+  }
+
+  return costs
+}
+
+async function fetchSiteCosts(): Promise<Map<string, SiteCostEntry>> {
+  console.log(`Fetching model pricing from ${MODELS_PAGE}...`)
+  const pageResp = await fetch(MODELS_PAGE)
+  if (!pageResp.ok) throw new Error(`models page returned ${pageResp.status}`)
+  const html = await pageResp.text()
+
+  const assetPaths = [...html.matchAll(/href="([^"]+\.js)"/g)]
+    .map((m) => m[1])
+    .filter((path) => path.startsWith("/assets/"))
+
+  for (const path of assetPaths) {
+    const assetResp = await fetch(new URL(path, MODELS_PAGE))
+    if (!assetResp.ok) continue
+    const source = await assetResp.text()
+    if (!source.includes("All coding models supported by Command Code") ||
+        !source.includes("tldrStats")) {
+      continue
+    }
+
+    const costs = parseSiteCostsFromBundle(source)
+    console.log(`  Found ${costs.size / 2} site pricing entries in ${path}`)
+    return costs
+  }
+
+  console.warn("  Could not find site pricing bundle")
+  return new Map()
 }
 
 function findBalancedObject(source: string, anchor: string): string {
@@ -189,6 +310,39 @@ function extractSpecConstants(source: string): { chatComplete: string; responses
   }
 }
 
+function escapeRegExp(input: string): string {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+function findStringAssignment(source: string, varName: string): string | undefined {
+  const match = source.match(new RegExp(`\\b${escapeRegExp(varName)}="([^"]+)"`))
+  return match?.[1]
+}
+
+function addCatalogContextConstants(
+  source: string,
+  rawCatalog: string,
+  context: Record<string, unknown>,
+  wt: Record<string, string>,
+) {
+  const idVars = rawCatalog.matchAll(/\bid:([A-Za-z_$][\w$]*)/g)
+  for (const match of idVars) {
+    const varName = match[1]
+    if (varName in context) continue
+    const value = findStringAssignment(source, varName)
+    if (value) context[varName] = value
+  }
+
+  const providerVars = rawCatalog.matchAll(/\bprovider:([A-Za-z_$][\w$]*)/g)
+  for (const match of providerVars) {
+    const varName = match[1]
+    if (varName in context) continue
+    if (source.includes(`${varName}=Jt[0]`)) {
+      context[varName] = wt.VERCEL_AI_GATEWAY
+    }
+  }
+}
+
 function extractModelCatalog(
   source: string,
   wt: Record<string, string>,
@@ -200,6 +354,7 @@ function extractModelCatalog(
   ctx[spec.chatComplete] = "chatComplete"
   ctx[spec.responses] = "responses"
   if (spec.qt) ctx[spec.qt] = wt.VERCEL_AI_GATEWAY
+  addCatalogContextConstants(source, raw, ctx, wt)
   return evaluateWithContext(normalizeForEval(raw), ctx)
 }
 
@@ -267,13 +422,27 @@ function buildCostMap(costs: Record<string, CostEntry[]>): Map<string, CostEntry
 function buildModelEntry(
   entry: SnEntry,
   costMap: Map<string, CostEntry>,
-): ModelEntry | null {
-  const provider = entry.provider || "unknown"
-  const tier = TIER_MAP[provider] ?? "open-source"
+  siteCosts: Map<string, SiteCostEntry>,
+): ModelEntry {
+  const tier = getModelTier(entry)
 
   const costEntry = costMap.get(entry.id)
+  const siteCost = siteCosts.get(`slug:${toSiteSlug(entry.id)}`) ??
+    siteCosts.get(`title:${entry.name.toLowerCase()}`)
   let cost: { input: number; output: number; cache_read?: number; cache_write?: number }
-  if (costEntry) {
+  if (siteCost) {
+    cost = {
+      input: siteCost.input,
+      output: siteCost.output,
+    }
+    if (siteCost.cache_read !== undefined) cost.cache_read = siteCost.cache_read
+    else if (costEntry?.cacheHitCost && costEntry.cacheHitCost > 0) {
+      cost.cache_read = costEntry.cacheHitCost
+    }
+    if (costEntry?.cacheWrite5mCost && costEntry.cacheWrite5mCost > 0) {
+      cost.cache_write = costEntry.cacheWrite5mCost
+    }
+  } else if (costEntry) {
     cost = {
       input: costEntry.promptCost,
       output: costEntry.completionCost,
@@ -282,8 +451,13 @@ function buildModelEntry(
     if (costEntry.cacheWrite5mCost > 0) cost.cache_write = costEntry.cacheWrite5mCost
   } else {
     const fallback = FALLBACK_COSTS[entry.id]
-    if (!fallback) return null
-    cost = fallback
+    if (fallback) {
+      cost = fallback
+    } else if (entry.badge === "free") {
+      cost = { input: 0, output: 0 }
+    } else {
+      cost = { input: 0, output: 0 }
+    }
   }
 
   const limit = entry.contextWindow
@@ -292,7 +466,7 @@ function buildModelEntry(
 
   return {
     id: entry.id,
-    name: entry.name,
+    name: getDisplayName(entry, tier),
     tier,
     reasoning: entry.reasoning || (entry.reasoningEfforts?.length ?? 0) > 0,
     tool_call: true,
@@ -305,6 +479,10 @@ function toConfigKey(id: string): string {
   const slashIdx = id.indexOf("/")
   const short = slashIdx >= 0 ? id.slice(slashIdx + 1) : id
   return short.toLowerCase()
+}
+
+function toSiteSlug(id: string): string {
+  return toConfigKey(id).replace(/\./g, "-")
 }
 
 function generateOpencodeModels(entries: ModelEntry[]): Record<string, unknown> {
@@ -413,24 +591,27 @@ async function main() {
   const costMap = buildCostMap(costs)
   console.log(`  Found ${costMap.size} cost entries`)
 
+  const siteCosts = await fetchSiteCosts()
+
   const entries: ModelEntry[] = []
 
   for (const [, model] of Object.entries(models)) {
-    const entry = buildModelEntry(model, costMap)
-    if (entry) {
-      entries.push(entry)
-    } else {
-      console.warn(`  Skipping ${model.id}: no cost data`)
+    const entry = buildModelEntry(model, costMap, siteCosts)
+    if (!costMap.has(model.id) &&
+        !siteCosts.has(`slug:${toSiteSlug(model.id)}`) &&
+        !siteCosts.has(`title:${model.name.toLowerCase()}`) &&
+        !FALLBACK_COSTS[model.id] &&
+        model.badge !== "free") {
+      console.warn(`  Including ${model.id}: no published cost data, using $0/$0 placeholder`)
     }
+    entries.push(entry)
   }
 
   for (const extra of HARDCODED_EXTRAS) {
     if (!entries.some((e) => e.id === extra.id)) {
-      const entry = buildModelEntry(extra, costMap)
-      if (entry) {
-        console.log(`  Adding hardcoded extra: ${extra.id}`)
-        entries.push(entry)
-      }
+      const entry = buildModelEntry(extra, costMap, siteCosts)
+      console.log(`  Adding hardcoded extra: ${extra.id}`)
+      entries.push(entry)
     }
   }
 

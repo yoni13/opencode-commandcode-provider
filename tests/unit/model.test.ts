@@ -55,6 +55,51 @@ test("doStream sends correct headers", async () => {
   expect(headers["x-project-slug"]).toBe("opencode")
 })
 
+test("doStream accepts comma-separated API keys", async () => {
+  const encoder = new TextEncoder()
+  const authorizations: string[] = []
+  const originalFetch = globalThis.fetch
+  let callCount = 0
+  globalThis.fetch = (async (_input: RequestInfo | URL, options?: RequestInit) => {
+    authorizations.push((options?.headers as Record<string, string>).Authorization)
+    callCount++
+    if (callCount === 1) {
+      return {
+        ok: false,
+        status: 402,
+        statusText: "Payment Required",
+        headers: new Headers(),
+        body: null,
+        text: () => Promise.resolve(JSON.stringify({
+          error: { message: "You have insufficient credits to make this request." },
+        })),
+      } as Response
+    }
+    return {
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      headers: new Headers(),
+      body: new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(encoder.encode('data: {"type":"start"}\n\n'))
+          controller.close()
+        },
+      }),
+    } as Response
+  }) as typeof globalThis.fetch
+
+  try {
+    const model = new CommandCodeLanguageModel(MODEL_ID, {
+      apiKey: " key-one, key-two ",
+    })
+    await model.doStream(makeCallOptions())
+    expect(authorizations).toEqual(["Bearer key-one", "Bearer key-two"])
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
 test("doStream sends request body with model and messages", async () => {
   const { calls, restore, respondWith } = mockFetchTrack()
   respondWith({
@@ -163,6 +208,265 @@ test("doStream streams returned parts", async () => {
   expect(parts).toHaveLength(2)
   expect(parts[0].type).toBe("stream-start")
   expect(parts[1].type).toBe("text-delta")
+})
+
+test("doStream retries a server_error network connection loss", async () => {
+  const encoder = new TextEncoder()
+  const responses = [
+    ['data: {"type":"server_error","message":"Network connection lost."}\n\n'],
+    [
+      'data: {"type":"start"}\n\n',
+      'data: {"type":"text-delta","id":"t1","delta":"recovered"}\n\n',
+    ],
+  ]
+  const calls: string[] = []
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    calls.push(String(input))
+    const chunks = responses.shift()
+    if (!chunks) throw new Error("Unexpected fetch")
+    return {
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      headers: new Headers(),
+      body: new ReadableStream<Uint8Array>({
+        start(controller) {
+          for (const chunk of chunks) controller.enqueue(encoder.encode(chunk))
+          controller.close()
+        },
+      }),
+    } as Response
+  }) as typeof globalThis.fetch
+
+  try {
+    const model = new CommandCodeLanguageModel(MODEL_ID, {
+      apiKey: API_KEY,
+      maxRetries: 1,
+      retryDelayMs: 0,
+    })
+    const result = await model.doStream(makeCallOptions())
+    const reader = result.stream.getReader()
+    const parts: any[] = []
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      parts.push(value)
+    }
+
+    expect(calls).toHaveLength(2)
+    expect(parts.some((part) => part.type === "error")).toBe(false)
+    expect(parts).toContainEqual({
+      type: "text-delta",
+      id: "commandcode-retry-status",
+      delta: "\n[Command Code: network connection lost; retry 1/1]\n",
+    })
+    expect(parts).toContainEqual({
+      type: "text-delta",
+      id: "t1",
+      delta: "recovered",
+    })
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test("doStream reports how many network retries were exhausted", async () => {
+  const encoder = new TextEncoder()
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async () => ({
+    ok: true,
+    status: 200,
+    statusText: "OK",
+    headers: new Headers(),
+    body: new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(
+          encoder.encode('data: {"type":"server_error","message":"Network connection lost."}\n\n'),
+        )
+        controller.close()
+      },
+    }),
+  })) as typeof globalThis.fetch
+
+  try {
+    const model = new CommandCodeLanguageModel(MODEL_ID, {
+      apiKey: API_KEY,
+      maxRetries: 2,
+      retryDelayMs: 0,
+    })
+    const result = await model.doStream(makeCallOptions())
+    const reader = result.stream.getReader()
+    const parts: any[] = []
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      parts.push(value)
+    }
+
+    expect(
+      parts
+        .filter((part) => part.type === "text-delta")
+        .map((part) => part.delta),
+    ).toEqual([
+      "\n[Command Code: network connection lost; retry 1/2]\n",
+      "\n[Command Code: network connection lost; retry 2/2]\n",
+    ])
+    const finalError = parts.find((part) => part.type === "error")
+    expect(finalError.error.message).toContain("after 2 retries")
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test("doStream retries a server error marked isRetryable", async () => {
+  const encoder = new TextEncoder()
+  const responses = [
+    [
+      'data: {"type":"server_error","message":"Service temporarily unavailable. Please try again shortly.","statusCode":503,"isRetryable":true}\n\n',
+    ],
+    ['data: {"type":"text-delta","id":"t1","delta":"recovered"}\n\n'],
+  ]
+  const originalFetch = globalThis.fetch
+  let fetchCount = 0
+  globalThis.fetch = (async () => {
+    fetchCount++
+    const chunks = responses.shift()
+    if (!chunks) throw new Error("Unexpected fetch")
+    return {
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      headers: new Headers(),
+      body: new ReadableStream<Uint8Array>({
+        start(controller) {
+          for (const chunk of chunks) controller.enqueue(encoder.encode(chunk))
+          controller.close()
+        },
+      }),
+    } as Response
+  }) as typeof globalThis.fetch
+
+  try {
+    const model = new CommandCodeLanguageModel(MODEL_ID, {
+      apiKey: API_KEY,
+      maxRetries: 1,
+      retryDelayMs: 0,
+    })
+    const result = await model.doStream(makeCallOptions())
+    const reader = result.stream.getReader()
+    const parts: any[] = []
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      parts.push(value)
+    }
+
+    expect(fetchCount).toBe(2)
+    expect(parts).toContainEqual({
+      type: "text-delta",
+      id: "commandcode-retry-status",
+      delta: "\n[Command Code: retryable server error: Service temporarily unavailable. Please try again shortly; retry 1/1]\n",
+    })
+    expect(parts).toContainEqual({
+      type: "text-delta",
+      id: "t1",
+      delta: "recovered",
+    })
+    expect(parts.some((part) => part.type === "error")).toBe(false)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test("doStream switches keys on a streamed insufficient credits error", async () => {
+  const encoder = new TextEncoder()
+  const authorizations: string[] = []
+  const responses = [
+    ['data: {"type":"server_error","message":"Insufficient credits."}\n\n'],
+    ['data: {"type":"text-delta","id":"t1","delta":"second key"}\n\n'],
+  ]
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async (_input: RequestInfo | URL, options?: RequestInit) => {
+    authorizations.push((options?.headers as Record<string, string>).Authorization)
+    const chunks = responses.shift()
+    if (!chunks) throw new Error("Unexpected fetch")
+    return {
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      headers: new Headers(),
+      body: new ReadableStream<Uint8Array>({
+        start(controller) {
+          for (const chunk of chunks) controller.enqueue(encoder.encode(chunk))
+          controller.close()
+        },
+      }),
+    } as Response
+  }) as typeof globalThis.fetch
+
+  try {
+    const model = new CommandCodeLanguageModel(MODEL_ID, {
+      apiKey: "key-one,key-two",
+      retryDelayMs: 0,
+    })
+    const result = await model.doStream(makeCallOptions())
+    const reader = result.stream.getReader()
+    const parts: any[] = []
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      parts.push(value)
+    }
+
+    expect(authorizations).toEqual(["Bearer key-one", "Bearer key-two"])
+    expect(parts).toContainEqual({
+      type: "text-delta",
+      id: "commandcode-key-status",
+      delta: "\n[Command Code: switched to API key 2/2]\n",
+    })
+    expect(parts).toContainEqual({
+      type: "text-delta",
+      id: "t1",
+      delta: "second key",
+    })
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test("doStream reports when all configured keys lack credits", async () => {
+  const originalFetch = globalThis.fetch
+  const authorizations: string[] = []
+  globalThis.fetch = (async (_input: RequestInfo | URL, options?: RequestInit) => {
+    authorizations.push((options?.headers as Record<string, string>).Authorization)
+    return {
+      ok: false,
+      status: 402,
+      statusText: "Payment Required",
+      headers: new Headers(),
+      body: null,
+      text: () => Promise.resolve(JSON.stringify({
+        message: "Insufficient credits.",
+      })),
+    } as Response
+  }) as typeof globalThis.fetch
+
+  try {
+    const model = new CommandCodeLanguageModel(MODEL_ID, {
+      apiKey: "key-one,key-two,key-three",
+    })
+    expect(model.doStream(makeCallOptions())).rejects.toThrow(
+      "Tried all 3 configured API keys",
+    )
+    expect(authorizations).toEqual([
+      "Bearer key-one",
+      "Bearer key-two",
+      "Bearer key-three",
+    ])
+  } finally {
+    globalThis.fetch = originalFetch
+  }
 })
 
 test("doGenerate returns complete response", async () => {

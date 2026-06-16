@@ -104,7 +104,14 @@ function toStreamPart(event: RawEvent): LanguageModelV3StreamPart | null {
     case "error":
       return { type: "error", error: event.error ?? event.message ?? "Unknown error" }
 
+    case "server_error":
+    case "server-error":
+      return { type: "error", error: event }
+
     default:
+      if (event.type?.toLowerCase().includes("error")) {
+        return { type: "error", error: event }
+      }
       return null
   }
 }

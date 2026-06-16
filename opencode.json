@@ -2,10 +2,10 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "commandcode/deepseek-v4-flash",
   "small_model": "commandcode/deepseek-v4-flash",
-  "plugin": ["commandcode-go-opencode-provider/server"],
+  "plugin": ["file:///mnt/6f99f95d-0b93-4a42-84ea-c848405a2812/projects/opencode-commandcode-provider/plugin.ts"],
   "provider": {
     "commandcode": {
-      "npm": "commandcode-go-opencode-provider",
+      "npm": "file:///mnt/6f99f95d-0b93-4a42-84ea-c848405a2812/projects/opencode-commandcode-provider",
       "name": "Command Code",
       "env": ["COMMANDCODE_API_KEY"],
       "options": {
