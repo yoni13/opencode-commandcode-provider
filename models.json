@@ -257,6 +257,21 @@
     }
   },
   {
+    "id": "zai-org/GLM-5.2",
+    "name": "GLM-5.2",
+    "tier": "open-source",
+    "reasoning": false,
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 1000000,
+      "output": 65536
+    }
+  },
+  {
     "id": "moonshotai/Kimi-K2.5",
     "name": "Kimi K2.5",
     "tier": "open-source",
@@ -304,7 +319,7 @@
   },
   {
     "id": "moonshotai/Kimi-K2.7-Code-Highspeed",
-    "name": "Kimi K2.7 Code High Speed",
+    "name": "Kimi K2.7 Code HighSpeed",
     "tier": "open-source",
     "reasoning": true,
     "tool_call": true,

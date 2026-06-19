@@ -8,12 +8,13 @@ import type {
   LanguageModelV3Usage,
   LanguageModelV3FinishReason,
 } from "@ai-sdk/provider"
+import { randomUUID } from "crypto"
 import { buildRequest } from "./convert.js"
 import { parseStreamEvents } from "./stream.js"
 
 const DEFAULT_BASE_URL = "https://api.commandcode.ai"
 // x-command-code-version must match the Command Code CLI version for API compatibility
-const CC_VERSION = "0.26.20"
+const CC_VERSION = "0.40.0"
 
 export interface CommandCodeModelOptions {
   apiKey: string
@@ -32,6 +33,7 @@ export class CommandCodeLanguageModel implements LanguageModelV3 {
   private opts: CommandCodeModelOptions
   private apiKeys: string[]
   private keyIndex = 0
+  private sessionId = randomUUID()
 
   constructor(modelId: string, opts: CommandCodeModelOptions) {
     this.modelId = modelId
@@ -51,13 +53,19 @@ export class CommandCodeLanguageModel implements LanguageModelV3 {
     return this.opts.baseURL ?? DEFAULT_BASE_URL
   }
 
+  private get projectSlug(): string {
+    return "commandcode-provider"
+  }
+
   private buildHeaders(): Record<string, string> {
     return {
       "Content-Type": "application/json",
       Authorization: `Bearer ${this.apiKeys[this.keyIndex]}`,
       "x-command-code-version": CC_VERSION,
       "x-cli-environment": "production",
-      "x-project-slug": "opencode",
+      "x-project-slug": this.projectSlug,
+      "x-co-flag": "false",
+      "x-session-id": this.sessionId,
       ...this.opts.headers,
     }
   }
@@ -80,11 +88,41 @@ export class CommandCodeLanguageModel implements LanguageModelV3 {
     return String(error)
   }
 
+  private isRateLimitError(error: unknown, message: string): boolean {
+    const normalized = message.toLowerCase()
+    if (normalized.includes("rate limit") || normalized.includes("too many requests")) {
+      return true
+    }
+
+    if (typeof error !== "object" || error === null) return false
+    const record = error as Record<string, unknown>
+    return record.status === 429 ||
+      record.statusCode === 429 ||
+      record.type === "rate_limit_error" ||
+      (typeof record.error === "object" &&
+        record.error !== null &&
+        (record.error as Record<string, unknown>).type === "rate_limit_error")
+  }
+
   private isRetryableStreamError(error: unknown, message: string): boolean {
+    if (this.isRateLimitError(error, message)) return false
     if (message.toLowerCase().includes("network connection lost")) return true
     return typeof error === "object" &&
       error !== null &&
       (error as Record<string, unknown>).isRetryable === true
+  }
+
+  private isRetryableHttpError(response: Response, parsedBody: unknown, message: string): boolean {
+    if (this.isRateLimitError(parsedBody, message) || response.status === 429) return false
+    if (response.status === 529) return false
+
+    if (typeof parsedBody === "object" &&
+        parsedBody !== null &&
+        (parsedBody as Record<string, unknown>).isRetryable === true) {
+      return true
+    }
+
+    return response.status >= 500 && response.status < 600
   }
 
   private selectNextAvailableKey(exhaustedKeyIndexes: Set<number>): boolean {
@@ -108,6 +146,10 @@ export class CommandCodeLanguageModel implements LanguageModelV3 {
     signal: AbortSignal,
     exhaustedKeyIndexes: Set<number>,
   ): Promise<Response> {
+    let retryCount = 0
+    const maxRetries = Math.max(0, this.opts.maxRetries ?? 3)
+    const retryDelayMs = Math.max(0, this.opts.retryDelayMs ?? 1000)
+
     while (true) {
       if (exhaustedKeyIndexes.has(this.keyIndex) &&
           !this.selectNextAvailableKey(exhaustedKeyIndexes)) {
@@ -116,12 +158,24 @@ export class CommandCodeLanguageModel implements LanguageModelV3 {
         )
       }
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers: this.buildHeaders(),
-        body,
-        signal,
-      })
+      let response: Response
+      try {
+        response = await fetch(url, {
+          method: "POST",
+          headers: this.buildHeaders(),
+          body,
+          signal,
+        })
+      } catch (error) {
+        if (signal.aborted || retryCount >= maxRetries) throw error
+        const delay = retryDelayMs * Math.pow(2, retryCount)
+        retryCount++
+        if (delay > 0) {
+          await new Promise((resolve) => setTimeout(resolve, delay))
+        }
+        continue
+      }
+
       if (response.ok) {
         if (!response.body) {
           throw new Error(`Command Code API returned no body [model=${this.modelId}]`)
@@ -131,15 +185,31 @@ export class CommandCodeLanguageModel implements LanguageModelV3 {
 
       const errorBody = await response.text().catch(() => "")
       let errorMessage = `Command Code API error: ${response.status} ${response.statusText}`
+      let parsedBody: unknown
       try {
-        const parsed = JSON.parse(errorBody)
-        if (parsed.error?.message) errorMessage = parsed.error.message
-        else if (parsed.message) errorMessage = parsed.message
+        parsedBody = JSON.parse(errorBody)
+        if ((parsedBody as any).error?.message) errorMessage = (parsedBody as any).error.message
+        else if ((parsedBody as any).message) errorMessage = (parsedBody as any).message
       } catch {
         // intentionally silent: error body is not JSON
       }
 
       if (!this.isInsufficientCredits(errorMessage)) {
+        if (this.isRetryableHttpError(response, parsedBody, errorMessage)) {
+          if (retryCount >= maxRetries) {
+            throw new Error(
+              `${errorMessage} after ${maxRetries} retries [model=${this.modelId}]`,
+            )
+          }
+
+          const delay = retryDelayMs * Math.pow(2, retryCount)
+          retryCount++
+          if (delay > 0) {
+            await new Promise((resolve) => setTimeout(resolve, delay))
+          }
+          continue
+        }
+
         throw new Error(`${errorMessage} [model=${this.modelId}]`)
       }
 

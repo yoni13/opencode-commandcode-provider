@@ -8,7 +8,10 @@ export function resolveApiKey(options: {
 }): string | undefined {
   if (options.apiKey) return options.apiKey
 
-  const envKey = options.env?.COMMANDCODE_API_KEY ?? process.env.COMMANDCODE_API_KEY
+  const envKey = options.env?.COMMANDCODE_API_KEY ??
+    options.env?.COMMAND_CODE_API_KEY ??
+    process.env.COMMANDCODE_API_KEY ??
+    process.env.COMMAND_CODE_API_KEY
   if (envKey) return envKey
 
   const authPaths = [

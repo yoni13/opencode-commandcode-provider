@@ -3,6 +3,7 @@ import { resolveApiKey } from "../../src/auth.js"
 
 beforeEach(() => {
   delete process.env.COMMANDCODE_API_KEY
+  delete process.env.COMMAND_CODE_API_KEY
 })
 
 test("resolves from explicit apiKey option", () => {
@@ -14,6 +15,12 @@ test("resolves from COMMANDCODE_API_KEY env var", () => {
   process.env.COMMANDCODE_API_KEY = "sk-from-env"
   const result = resolveApiKey({})
   expect(result).toBe("sk-from-env")
+})
+
+test("resolves from COMMAND_CODE_API_KEY env var", () => {
+  process.env.COMMAND_CODE_API_KEY = "sk-from-official-env"
+  const result = resolveApiKey({})
+  expect(result).toBe("sk-from-official-env")
 })
 
 test("explicit apiKey takes priority over env var", () => {
@@ -31,6 +38,13 @@ test("uses env override from options.env over process.env", () => {
   process.env.COMMANDCODE_API_KEY = "sk-from-process-env"
   const result = resolveApiKey({ env: { COMMANDCODE_API_KEY: "sk-from-options-env" } })
   expect(result).toBe("sk-from-options-env")
+})
+
+test("COMMANDCODE_API_KEY takes priority over COMMAND_CODE_API_KEY", () => {
+  process.env.COMMANDCODE_API_KEY = "sk-compat-env"
+  process.env.COMMAND_CODE_API_KEY = "sk-official-env"
+  const result = resolveApiKey({})
+  expect(result).toBe("sk-compat-env")
 })
 
 test("falls through to process.env when options.env is missing key", () => {

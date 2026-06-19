@@ -319,11 +319,111 @@ function findStringAssignment(source: string, varName: string): string | undefin
   return match?.[1]
 }
 
+function splitTopLevel(input: string): string[] {
+  const parts: string[] = []
+  let start = 0
+  let depth = 0
+  let inString = false
+  let escaped = false
+
+  for (let i = 0; i < input.length; i++) {
+    const ch = input[i]
+    if (inString) {
+      if (escaped) escaped = false
+      else if (ch === "\\") escaped = true
+      else if (ch === "\"") inString = false
+      continue
+    }
+
+    if (ch === "\"") {
+      inString = true
+    } else if (ch === "[" || ch === "{" || ch === "(") {
+      depth++
+    } else if (ch === "]" || ch === "}" || ch === ")") {
+      depth--
+    } else if (ch === "," && depth === 0) {
+      parts.push(input.slice(start, i).trim())
+      start = i + 1
+    }
+  }
+
+  parts.push(input.slice(start).trim())
+  return parts
+}
+
+function findArrayAssignment(source: string, varName: string): string[] | undefined {
+  const match = source.match(new RegExp(`\\b${escapeRegExp(varName)}=\\[`))
+  if (!match || match.index === undefined) return undefined
+
+  const start = match.index + match[0].length - 1
+  let depth = 0
+  let inString = false
+  let escaped = false
+  let end = start
+
+  for (; end < source.length; end++) {
+    const ch = source[end]
+    if (inString) {
+      if (escaped) escaped = false
+      else if (ch === "\\") escaped = true
+      else if (ch === "\"") inString = false
+      continue
+    }
+
+    if (ch === "\"") {
+      inString = true
+    } else if (ch === "[") {
+      depth++
+    } else if (ch === "]") {
+      depth--
+      if (depth === 0) break
+    }
+  }
+
+  const arraySource = source.slice(start, end + 1)
+  return splitTopLevel(arraySource.slice(1, -1))
+}
+
+function resolveWtExpression(
+  expression: string,
+  wtName: string,
+  wt: Record<string, string>,
+): string | undefined {
+  const direct = expression.match(new RegExp(`\\b${escapeRegExp(wtName)}\\.([A-Z0-9_]+)`))
+  if (direct) return wt[direct[1]]
+
+  const initialized = expression.match(/\)\.([A-Z0-9_]+)$/)
+  if (initialized) return wt[initialized[1]]
+
+  return undefined
+}
+
+function findWtAliasAssignment(
+  source: string,
+  varName: string,
+  wtName: string,
+  wt: Record<string, string>,
+): string | undefined {
+  const directMatch = source.match(new RegExp(`\\b${escapeRegExp(varName)}=([^,;]+)`))
+  if (!directMatch) return undefined
+
+  const direct = resolveWtExpression(directMatch[1], wtName, wt)
+  if (direct) return direct
+
+  const arrayMatch = directMatch[1].match(/^([A-Za-z_$][\w$]*)\[(\d+)\]$/)
+  if (!arrayMatch) return undefined
+
+  const entries = findArrayAssignment(source, arrayMatch[1])
+  const entry = entries?.[Number(arrayMatch[2])]
+  return entry ? resolveWtExpression(entry, wtName, wt) : undefined
+}
+
 function addCatalogContextConstants(
   source: string,
   rawCatalog: string,
   context: Record<string, unknown>,
   wt: Record<string, string>,
+  wtName: string,
 ) {
   const idVars = rawCatalog.matchAll(/\bid:([A-Za-z_$][\w$]*)/g)
   for (const match of idVars) {
@@ -337,9 +437,8 @@ function addCatalogContextConstants(
   for (const match of providerVars) {
     const varName = match[1]
     if (varName in context) continue
-    if (source.includes(`${varName}=Jt[0]`)) {
-      context[varName] = wt.VERCEL_AI_GATEWAY
-    }
+    const value = findWtAliasAssignment(source, varName, wtName, wt)
+    if (value) context[varName] = value
   }
 }
 
@@ -354,7 +453,7 @@ function extractModelCatalog(
   ctx[spec.chatComplete] = "chatComplete"
   ctx[spec.responses] = "responses"
   if (spec.qt) ctx[spec.qt] = wt.VERCEL_AI_GATEWAY
-  addCatalogContextConstants(source, raw, ctx, wt)
+  addCatalogContextConstants(source, raw, ctx, wt, wtName)
   return evaluateWithContext(normalizeForEval(raw), ctx)
 }
 

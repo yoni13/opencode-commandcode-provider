@@ -1,13 +1,15 @@
-# commandcode-go-opencode-provider
+# opencode-commandcode-provider
 
 [Command Code](https://commandcode.ai) API provider for [opencode](https://opencode.ai). Use Claude, GPT, Gemini, DeepSeek, Qwen, Kimi, GLM, MiniMax, Step, and other models through a single API key.
+
+This is a community fork — install directly from GitHub:
 
 ## Quick Start
 
 ### 1. Install
 
 ```bash
-opencode plugin commandcode-go-opencode-provider
+opencode plugin https://github.com/yoni13/opencode-commandcode-provider
 ```
 
 This installs the provider and registers all available models automatically.
@@ -42,10 +44,10 @@ If you prefer to configure manually, add this to your `opencode.json`:
 
 ```json
 {
-  "plugin": ["commandcode-go-opencode-provider/server"],
+  "plugin": ["https://github.com/yoni13/opencode-commandcode-provider/server"],
   "provider": {
     "commandcode": {
-      "npm": "commandcode-go-opencode-provider",
+      "npm": "https://github.com/yoni13/opencode-commandcode-provider",
       "name": "Command Code",
       "env": ["COMMANDCODE_API_KEY"]
     }
@@ -90,10 +92,11 @@ COMMANDCODE_API_KEY=key1,key2,key3 opencode
 | `deepseek/deepseek-v4-pro`                 | DeepSeek V4 Pro             | open-source  | yes | 1M     |
 | `zai-org/GLM-5`                            | GLM-5                       | open-source  | no  | 200K   |
 | `zai-org/GLM-5.1`                          | GLM-5.1                     | open-source  | no  | 200K   |
+| `zai-org/GLM-5.2`                          | GLM-5.2                     | open-source  | no  | 1M     |
 | `moonshotai/Kimi-K2.5`                     | Kimi K2.5                   | open-source  | no  | 256K   |
 | `moonshotai/Kimi-K2.6`                     | Kimi K2.6                   | open-source  | no  | 256K   |
 | `moonshotai/Kimi-K2.7-Code`                | Kimi K2.7 Code              | open-source  | yes | 256K   |
-| `moonshotai/Kimi-K2.7-Code-Highspeed`      | Kimi K2.7 Code High Speed   | open-source  | yes | 262K   |
+| `moonshotai/Kimi-K2.7-Code-Highspeed`      | Kimi K2.7 Code HighSpeed    | open-source  | yes | 262K   |
 | `xiaomi/mimo-v2.5`                         | MiMo V2.5                   | open-source  | no  | 1M     |
 | `xiaomi/mimo-v2.5-pro`                     | MiMo V2.5 Pro               | open-source  | no  | 1M     |
 | `MiniMaxAI/MiniMax-M2.5`                   | MiniMax M2.5                | open-source  | no  | 200K   |
@@ -107,12 +110,12 @@ COMMANDCODE_API_KEY=key1,key2,key3 opencode
 | `stepfun/Step-3.5-Flash`                   | Step 3.5 Flash              | open-source  | yes | 1M     |
 | `stepfun/Step-3.7-Flash`                   | Step 3.7 Flash              | open-source  | yes | 256K   |
 
-Full model list is maintained in [`models.json`](./models.json). Run `bun run sync` to refresh from the latest Command Code CLI release on npm.
+Full model list is maintained in [`models.json`](./models.json). See [Sync Models](#sync-models) to refresh it from the latest Command Code CLI release.
 
 ## Development
 
 ```bash
-git clone https://github.com/brent-weatherall/commandcode-go-opencode-provider.git
+git clone https://github.com/yoni13/opencode-commandcode-provider.git
 cd commandcode-go-opencode-provider
 bun install
 ```
@@ -136,9 +139,23 @@ Run `opencode --config opencode.local.json` to test with your local build.
 
 ### Sync Models
 
+Refresh the model catalog whenever Command Code publishes new models:
+
 ```bash
-bun run sync              # update models.json from Command Code
-bun run sync:global       # update models.json + write to ~/.config/opencode/opencode.jsonc
+bun install
+bun run sync
+bun run generate-readme
+bun run typecheck
+```
+
+`bun run sync` downloads the latest `command-code` package from npm, extracts its model catalog and CLI pricing table, fetches public pricing from `https://commandcode.ai/models`, and writes [`models.json`](./models.json). Models without published pricing are still included with a `$0/$0` placeholder so the catalog does not silently drop newly available models.
+
+`bun run generate-readme` rebuilds the Available Models table from `models.json`.
+
+To also write the refreshed model map into your local global config, run:
+
+```bash
+bun run sync:global
 ```
 
 ## License

@@ -50,9 +50,11 @@ test("doStream sends correct headers", async () => {
   const headers = calls[0].options.headers as Record<string, string>
   expect(headers["Authorization"]).toBe("Bearer sk-test-key")
   expect(headers["Content-Type"]).toBe("application/json")
-  expect(headers["x-command-code-version"]).toBe("0.26.20")
+  expect(headers["x-command-code-version"]).toBe("0.40.0")
   expect(headers["x-cli-environment"]).toBe("production")
-  expect(headers["x-project-slug"]).toBe("opencode")
+  expect(headers["x-project-slug"]).toBe("commandcode-provider")
+  expect(headers["x-co-flag"]).toBe("false")
+  expect(typeof headers["x-session-id"]).toBe("string")
 })
 
 test("doStream accepts comma-separated API keys", async () => {
