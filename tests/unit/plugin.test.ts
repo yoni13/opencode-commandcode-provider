@@ -106,6 +106,27 @@ test("config hook registers provider with npm and models", async () => {
   expect(Object.keys(models).length).toBeGreaterThan(0)
 })
 
+test("config hook exposes reasoning efforts as opencode variants", async () => {
+  const plugin = await pluginFn()
+  const config: Record<string, unknown> = {
+    provider: { commandcode: {} },
+  }
+  await plugin.config(config)
+
+  const cc = (config.provider as Record<string, Record<string, unknown>>).commandcode
+  const models = cc.models as Record<string, Record<string, unknown>>
+  const sonnet = models["claude-sonnet-4-6"]
+
+  expect(sonnet.reasoning_efforts).toEqual(["low", "medium", "high", "xhigh", "max"])
+  expect(sonnet.variants).toEqual({
+    low: { reasoningEffort: "low" },
+    medium: { reasoningEffort: "medium" },
+    high: { reasoningEffort: "high" },
+    xhigh: { reasoningEffort: "xhigh" },
+    max: { reasoningEffort: "max" },
+  })
+})
+
 test("config hook does not overwrite existing npm field", async () => {
   const plugin = await pluginFn()
   const config: Record<string, unknown> = {

@@ -59,8 +59,21 @@ interface CCRequestEnvelope {
     temperature?: number
     top_p?: number
     top_k?: number
+    reasoning_effort?: ReasoningEffort
   }
 }
+
+const REASONING_EFFORTS = new Set([
+  "none",
+  "minimal",
+  "low",
+  "medium",
+  "high",
+  "xhigh",
+  "max",
+])
+
+type ReasoningEffort = "none" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max"
 
 function hasType(p: unknown, type: string): boolean {
   return typeof p === "object" && p !== null && (p as { type?: string }).type === type
@@ -171,6 +184,30 @@ function convertTools(
     }))
 }
 
+function getStringProperty(obj: unknown, key: string): string | undefined {
+  if (typeof obj !== "object" || obj === null) return undefined
+  const value = (obj as Record<string, unknown>)[key]
+  return typeof value === "string" ? value : undefined
+}
+
+function normalizeReasoningEffort(value: string | undefined): ReasoningEffort | undefined {
+  const normalized = value?.trim().toLowerCase()
+  return normalized && REASONING_EFFORTS.has(normalized)
+    ? normalized as ReasoningEffort
+    : undefined
+}
+
+function getReasoningEffort(options: LanguageModelV3CallOptions): ReasoningEffort | undefined {
+  const providerOptions = options.providerOptions
+  const commandcode = providerOptions?.commandcode ?? providerOptions?.commandCode
+
+  return normalizeReasoningEffort(
+    getStringProperty(commandcode, "reasoningEffort") ??
+    getStringProperty(commandcode, "reasoning_effort") ??
+    getStringProperty(commandcode, "effort"),
+  )
+}
+
 export function buildRequest(
   modelId: string,
   options: LanguageModelV3CallOptions,
@@ -199,6 +236,8 @@ export function buildRequest(
   if (options.temperature !== undefined) params.temperature = options.temperature
   if (options.topP !== undefined) params.top_p = options.topP
   if (options.topK !== undefined) params.top_k = options.topK
+  const reasoningEffort = getReasoningEffort(options)
+  if (reasoningEffort !== undefined) params.reasoning_effort = reasoningEffort
 
   return {
     config: {

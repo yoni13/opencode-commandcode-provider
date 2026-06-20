@@ -4,6 +4,30 @@
     "name": "[Premium] Claude Fable 5",
     "tier": "premium",
     "reasoning": true,
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "xhigh": {
+        "reasoningEffort": "xhigh"
+      },
+      "max": {
+        "reasoningEffort": "max"
+      }
+    },
     "tool_call": true,
     "cost": {
       "input": 10,
@@ -38,6 +62,30 @@
     "name": "[Premium] Claude Opus 4.7",
     "tier": "premium",
     "reasoning": true,
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "xhigh": {
+        "reasoningEffort": "xhigh"
+      },
+      "max": {
+        "reasoningEffort": "max"
+      }
+    },
     "tool_call": true,
     "cost": {
       "input": 5,
@@ -55,6 +103,30 @@
     "name": "[Premium] Claude Opus 4.8",
     "tier": "premium",
     "reasoning": true,
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "xhigh": {
+        "reasoningEffort": "xhigh"
+      },
+      "max": {
+        "reasoningEffort": "max"
+      }
+    },
     "tool_call": true,
     "cost": {
       "input": 5,
@@ -72,6 +144,30 @@
     "name": "[Premium] Claude Sonnet 4.6",
     "tier": "premium",
     "reasoning": true,
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "xhigh": {
+        "reasoningEffort": "xhigh"
+      },
+      "max": {
+        "reasoningEffort": "max"
+      }
+    },
     "tool_call": true,
     "cost": {
       "input": 3,
@@ -89,6 +185,22 @@
     "name": "[Premium] Gemini 3.1 Flash Lite",
     "tier": "premium",
     "reasoning": true,
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      }
+    },
     "tool_call": true,
     "cost": {
       "input": 0.25,
@@ -105,6 +217,22 @@
     "name": "[Premium] Gemini 3.5 Flash",
     "tier": "premium",
     "reasoning": true,
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      }
+    },
     "tool_call": true,
     "cost": {
       "input": 1.5,
@@ -121,6 +249,26 @@
     "name": "[Premium] GPT-5.3 Codex",
     "tier": "premium",
     "reasoning": true,
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "xhigh": {
+        "reasoningEffort": "xhigh"
+      }
+    },
     "tool_call": true,
     "cost": {
       "input": 2,
@@ -137,6 +285,26 @@
     "name": "[Premium] GPT-5.4",
     "tier": "premium",
     "reasoning": true,
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "xhigh": {
+        "reasoningEffort": "xhigh"
+      }
+    },
     "tool_call": true,
     "cost": {
       "input": 2.5,
@@ -153,6 +321,22 @@
     "name": "[Premium] GPT-5.4 Mini",
     "tier": "premium",
     "reasoning": true,
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      }
+    },
     "tool_call": true,
     "cost": {
       "input": 0.75,
@@ -169,6 +353,26 @@
     "name": "[Premium] GPT-5.5",
     "tier": "premium",
     "reasoning": true,
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "xhigh": {
+        "reasoningEffort": "xhigh"
+      }
+    },
     "tool_call": true,
     "cost": {
       "input": 5,
@@ -200,6 +404,18 @@
     "name": "DeepSeek V4 Flash",
     "tier": "open-source",
     "reasoning": true,
+    "reasoning_efforts": [
+      "high",
+      "max"
+    ],
+    "variants": {
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "max": {
+        "reasoningEffort": "max"
+      }
+    },
     "tool_call": true,
     "cost": {
       "input": 0.14,
@@ -215,6 +431,18 @@
     "name": "DeepSeek V4 Pro",
     "tier": "open-source",
     "reasoning": true,
+    "reasoning_efforts": [
+      "high",
+      "max"
+    ],
+    "variants": {
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "max": {
+        "reasoningEffort": "max"
+      }
+    },
     "tool_call": true,
     "cost": {
       "input": 1.74,

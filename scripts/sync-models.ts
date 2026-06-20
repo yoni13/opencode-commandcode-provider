@@ -15,6 +15,8 @@ interface ModelEntry {
   name: string
   tier: "premium" | "open-source"
   reasoning: boolean
+  reasoning_efforts?: string[]
+  variants?: Record<string, { reasoningEffort: string }>
   tool_call: boolean
   cost: { input: number; output: number; cache_read?: number; cache_write?: number }
   limit: { context: number; output: number }
@@ -134,6 +136,11 @@ function getDisplayName(entry: SnEntry, tier: "premium" | "open-source"): string
   }
 
   return `[Premium] ${entry.name}`
+}
+
+function buildReasoningVariants(efforts: string[] | undefined): Record<string, { reasoningEffort: string }> | undefined {
+  if (!efforts?.length) return undefined
+  return Object.fromEntries(efforts.map((effort) => [effort, { reasoningEffort: effort }]))
 }
 
 async function fetchLatestBundle(): Promise<{ source: string; version: string }> {
@@ -568,6 +575,8 @@ function buildModelEntry(
     name: getDisplayName(entry, tier),
     tier,
     reasoning: entry.reasoning || (entry.reasoningEfforts?.length ?? 0) > 0,
+    ...(entry.reasoningEfforts?.length ? { reasoning_efforts: entry.reasoningEfforts } : {}),
+    ...(entry.reasoningEfforts?.length ? { variants: buildReasoningVariants(entry.reasoningEfforts) } : {}),
     tool_call: true,
     cost,
     limit,
@@ -591,11 +600,14 @@ function generateOpencodeModels(entries: ModelEntry[]): Record<string, unknown> 
     const costObj: Record<string, number> = { input: entry.cost.input, output: entry.cost.output }
     if (entry.cost.cache_read !== undefined) costObj.cache_read = entry.cost.cache_read
     if (entry.cost.cache_write !== undefined) costObj.cache_write = entry.cost.cache_write
+    const variants = entry.variants ?? buildReasoningVariants(entry.reasoning_efforts)
 
     models[key] = {
       id: entry.id,
       name: entry.name,
       reasoning: entry.reasoning,
+      ...(entry.reasoning_efforts ? { reasoning_efforts: entry.reasoning_efforts } : {}),
+      ...(variants ? { variants } : {}),
       tool_call: entry.tool_call,
       cost: costObj,
       limit: entry.limit,

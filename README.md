@@ -72,6 +72,29 @@ The environment variable also accepts comma-separated keys:
 COMMANDCODE_API_KEY=key1,key2,key3 opencode
 ```
 
+### Reasoning Effort
+
+Some Command Code models support explicit reasoning effort. When calling the provider through the AI SDK, pass the setting under the `commandcode` provider options:
+
+```ts
+import { streamText } from "ai"
+import { createCommandCode } from "commandcode-go-opencode-provider"
+
+const commandcode = createCommandCode()
+
+await streamText({
+  model: commandcode.languageModel("claude-sonnet-4-6"),
+  prompt: "Implement the next task.",
+  providerOptions: {
+    commandcode: {
+      reasoningEffort: "high",
+    },
+  },
+})
+```
+
+The provider sends this as `reasoning_effort` to Command Code. Supported values are `low`, `medium`, `high`, `xhigh`, and `max`, depending on the selected model. The generated [`models.json`](./models.json) records per-model support in `reasoning_efforts` and exposes them to opencode as model `variants`, so the opencode variant picker can select the effort when the installed opencode build supports variants.
+
 ## Available Models
 
 | Model ID | Name | Tier | Reasoning | Context |

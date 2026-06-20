@@ -9,6 +9,8 @@ interface ModelEntry {
   name: string
   tier: "premium" | "open-source"
   reasoning: boolean
+  reasoning_efforts?: string[]
+  variants?: Record<string, { reasoningEffort: string }>
   tool_call: boolean
   cost: { input: number; output: number; cache_read?: number; cache_write?: number }
   limit: { context: number; output: number }
@@ -23,6 +25,11 @@ function toConfigKey(id: string): string {
   const slashIdx = id.indexOf("/")
   const short = slashIdx >= 0 ? id.slice(slashIdx + 1) : id
   return short.toLowerCase()
+}
+
+function buildReasoningVariants(efforts: string[] | undefined): Record<string, { reasoningEffort: string }> | undefined {
+  if (!efforts?.length) return undefined
+  return Object.fromEntries(efforts.map((effort) => [effort, { reasoningEffort: effort }]))
 }
 
 export default async function commandcodePlugin() {
@@ -47,11 +54,14 @@ export default async function commandcodePlugin() {
           const costObj: Record<string, number> = { input: entry.cost.input, output: entry.cost.output }
           if (entry.cost.cache_read !== undefined) costObj.cache_read = entry.cost.cache_read
           if (entry.cost.cache_write !== undefined) costObj.cache_write = entry.cost.cache_write
+          const variants = entry.variants ?? buildReasoningVariants(entry.reasoning_efforts)
 
           modelsObj[key] = {
             id: entry.id,
             name: entry.name,
             reasoning: entry.reasoning,
+            ...(entry.reasoning_efforts ? { reasoning_efforts: entry.reasoning_efforts } : {}),
+            ...(variants ? { variants } : {}),
             tool_call: entry.tool_call,
             cost: costObj,
             limit: entry.limit,

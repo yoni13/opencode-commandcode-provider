@@ -211,6 +211,50 @@ test("passes through temperature, topP, topK", () => {
   expect(req.params.top_k).toBe(40)
 })
 
+test("passes commandcode reasoningEffort as reasoning_effort", () => {
+  const req = buildRequest("m", makeOpts({
+    providerOptions: {
+      commandcode: {
+        reasoningEffort: "high",
+      },
+    },
+  }))
+  expect(req.params.reasoning_effort).toBe("high")
+})
+
+test("passes commandcode reasoning_effort as reasoning_effort", () => {
+  const req = buildRequest("m", makeOpts({
+    providerOptions: {
+      commandcode: {
+        reasoning_effort: "xhigh",
+      },
+    },
+  }))
+  expect(req.params.reasoning_effort).toBe("xhigh")
+})
+
+test("passes commandcode effort alias as reasoning_effort", () => {
+  const req = buildRequest("m", makeOpts({
+    providerOptions: {
+      commandcode: {
+        effort: "max",
+      },
+    },
+  }))
+  expect(req.params.reasoning_effort).toBe("max")
+})
+
+test("ignores invalid commandcode reasoning effort", () => {
+  const req = buildRequest("m", makeOpts({
+    providerOptions: {
+      commandcode: {
+        reasoningEffort: "extreme",
+      },
+    },
+  }))
+  expect(req.params.reasoning_effort).toBeUndefined()
+})
+
 test("defaults max_tokens to 16384 when not provided", () => {
   const req = buildRequest("m", makeOpts({ maxOutputTokens: undefined }))
   expect(req.params.max_tokens).toBe(16384)
