@@ -127,6 +127,24 @@ test("config hook exposes reasoning efforts as opencode variants", async () => {
   })
 })
 
+test("config hook exposes vision models as opencode attachments", async () => {
+  const plugin = await pluginFn()
+  const config: Record<string, unknown> = {
+    provider: { commandcode: {} },
+  }
+  await plugin.config(config)
+
+  const cc = (config.provider as Record<string, Record<string, unknown>>).commandcode
+  const models = cc.models as Record<string, Record<string, unknown>>
+  const sonnet = models["claude-sonnet-4-6"]
+
+  expect(sonnet.attachment).toBe(true)
+  expect(sonnet.modalities).toEqual({
+    input: ["text", "image"],
+    output: ["text"],
+  })
+})
+
 test("config hook does not overwrite existing npm field", async () => {
   const plugin = await pluginFn()
   const config: Record<string, unknown> = {

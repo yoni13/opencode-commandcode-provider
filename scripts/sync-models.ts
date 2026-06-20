@@ -9,12 +9,16 @@ const GLOBAL_CONFIG = join(homedir(), ".config", "opencode", "opencode.jsonc")
 const NPM_PACKAGE = "command-code"
 const TMP_DIR = join("/tmp", "cc-model-sync")
 const MODELS_PAGE = "https://commandcode.ai/models"
+const OPENCODE_MODALITIES = new Set(["text", "audio", "image", "video", "pdf"])
+type OpencodeModality = "text" | "audio" | "image" | "video" | "pdf"
 
 interface ModelEntry {
   id: string
   name: string
   tier: "premium" | "open-source"
   reasoning: boolean
+  attachment?: boolean
+  modalities?: { input: OpencodeModality[]; output: OpencodeModality[] }
   reasoning_efforts?: string[]
   variants?: Record<string, { reasoningEffort: string }>
   tool_call: boolean
@@ -43,6 +47,7 @@ interface SnEntry {
   badge?: string
   reasoning?: boolean
   reasoningEfforts?: string[]
+  inputModalities?: string[]
   contextWindow?: number
 }
 
@@ -141,6 +146,17 @@ function getDisplayName(entry: SnEntry, tier: "premium" | "open-source"): string
 function buildReasoningVariants(efforts: string[] | undefined): Record<string, { reasoningEffort: string }> | undefined {
   if (!efforts?.length) return undefined
   return Object.fromEntries(efforts.map((effort) => [effort, { reasoningEffort: effort }]))
+}
+
+function normalizeInputModalities(inputModalities: string[] | undefined): OpencodeModality[] | undefined {
+  if (!inputModalities?.length) return undefined
+
+  const modalities = inputModalities.filter((modality): modality is OpencodeModality =>
+    OPENCODE_MODALITIES.has(modality),
+  )
+  if (!modalities.includes("text")) modalities.unshift("text")
+
+  return [...new Set(modalities)]
 }
 
 async function fetchLatestBundle(): Promise<{ source: string; version: string }> {
@@ -569,12 +585,15 @@ function buildModelEntry(
   const limit = entry.contextWindow
     ? { context: entry.contextWindow, output: FALLBACK_LIMITS[entry.id]?.output ?? 65536 }
     : FALLBACK_LIMITS[entry.id] ?? { context: 200000, output: 65536 }
+  const inputModalities = normalizeInputModalities(entry.inputModalities)
 
   return {
     id: entry.id,
     name: getDisplayName(entry, tier),
     tier,
     reasoning: entry.reasoning || (entry.reasoningEfforts?.length ?? 0) > 0,
+    ...(inputModalities?.includes("image") ? { attachment: true } : {}),
+    ...(inputModalities ? { modalities: { input: inputModalities, output: ["text"] } } : {}),
     ...(entry.reasoningEfforts?.length ? { reasoning_efforts: entry.reasoningEfforts } : {}),
     ...(entry.reasoningEfforts?.length ? { variants: buildReasoningVariants(entry.reasoningEfforts) } : {}),
     tool_call: true,
@@ -606,6 +625,8 @@ function generateOpencodeModels(entries: ModelEntry[]): Record<string, unknown> 
       id: entry.id,
       name: entry.name,
       reasoning: entry.reasoning,
+      ...(entry.attachment !== undefined ? { attachment: entry.attachment } : {}),
+      ...(entry.modalities ? { modalities: entry.modalities } : {}),
       ...(entry.reasoning_efforts ? { reasoning_efforts: entry.reasoning_efforts } : {}),
       ...(variants ? { variants } : {}),
       tool_call: entry.tool_call,

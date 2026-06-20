@@ -4,11 +4,15 @@ import { fileURLToPath } from "url"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
+type OpencodeModality = "text" | "audio" | "image" | "video" | "pdf"
+
 interface ModelEntry {
   id: string
   name: string
   tier: "premium" | "open-source"
   reasoning: boolean
+  attachment?: boolean
+  modalities?: { input: OpencodeModality[]; output: OpencodeModality[] }
   reasoning_efforts?: string[]
   variants?: Record<string, { reasoningEffort: string }>
   tool_call: boolean
@@ -60,6 +64,8 @@ export default async function commandcodePlugin() {
             id: entry.id,
             name: entry.name,
             reasoning: entry.reasoning,
+            ...(entry.attachment !== undefined ? { attachment: entry.attachment } : {}),
+            ...(entry.modalities ? { modalities: entry.modalities } : {}),
             ...(entry.reasoning_efforts ? { reasoning_efforts: entry.reasoning_efforts } : {}),
             ...(variants ? { variants } : {}),
             tool_call: entry.tool_call,

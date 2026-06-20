@@ -1,6 +1,7 @@
 import type { LanguageModelV3CallOptions } from "@ai-sdk/provider"
 import type {
   LanguageModelV3FunctionTool,
+  LanguageModelV3FilePart,
   LanguageModelV3Message,
   LanguageModelV3TextPart,
   LanguageModelV3ReasoningPart,
@@ -10,9 +11,13 @@ import type {
 } from "@ai-sdk/provider"
 
 type CCMessage =
-  | { role: "user"; content: string | unknown[] }
+  | { role: "user"; content: string | CCUserContent[] }
   | { role: "assistant"; content: CCAssistantContent[] }
   | { role: "tool"; content: CCToolResultContent[] }
+
+type CCUserContent =
+  | { type: "text"; text: string }
+  | { type: "image"; image: string }
 
 type CCAssistantContent =
   | { type: "text"; text: string }
@@ -83,6 +88,10 @@ function isTextPart(p: unknown): p is LanguageModelV3TextPart {
   return hasType(p, "text")
 }
 
+function isFilePart(p: unknown): p is LanguageModelV3FilePart {
+  return hasType(p, "file")
+}
+
 function isReasoningPart(p: unknown): p is LanguageModelV3ReasoningPart {
   return hasType(p, "reasoning")
 }
@@ -95,15 +104,71 @@ function isToolResultPart(p: unknown): p is LanguageModelV3ToolResultPart {
   return hasType(p, "tool-result")
 }
 
-function extractText(content: unknown): string {
+function getStringProperty(obj: unknown, key: string): string | undefined {
+  if (typeof obj !== "object" || obj === null) return undefined
+  const value = (obj as Record<string, unknown>)[key]
+  return typeof value === "string" ? value : undefined
+}
+
+function dataToImageUrl(data: LanguageModelV3FilePart["data"], mediaType: string): string {
+  if (data instanceof URL) return data.toString()
+  if (typeof data === "string") {
+    if (/^(https?:|data:|file:)/.test(data)) return data
+    return `data:${mediaType};base64,${data}`
+  }
+  return `data:${mediaType};base64,${Buffer.from(data).toString("base64")}`
+}
+
+function convertImagePart(part: unknown): CCUserContent | null {
+  if (isFilePart(part)) {
+    if (!part.mediaType.startsWith("image/")) return null
+    return { type: "image", image: dataToImageUrl(part.data, part.mediaType) }
+  }
+
+  if (hasType(part, "image")) {
+    const image = getStringProperty(part, "image") ?? getStringProperty(part, "url")
+    return image ? { type: "image", image } : null
+  }
+
+  return null
+}
+
+function convertUserContent(content: unknown): string | CCUserContent[] {
   if (typeof content === "string") return content
   if (Array.isArray(content)) {
-    const textParts = content.filter(isTextPart) as LanguageModelV3TextPart[]
-    const nonTextParts = content.filter((p) => !isTextPart(p))
-    if (nonTextParts.length > 0 && textParts.length === 0) {
-      console.warn(`Command Code provider: dropped ${nonTextParts.length} non-text part(s) in user message`)
+    const converted: CCUserContent[] = []
+    let dropped = 0
+
+    for (const part of content) {
+      if (isTextPart(part)) {
+        converted.push({ type: "text", text: part.text })
+        continue
+      }
+
+      const image = convertImagePart(part)
+      if (image) {
+        converted.push(image)
+        continue
+      }
+
+      dropped++
     }
-    return textParts.map((p) => p.text).join("\n")
+
+    if (dropped > 0 && converted.length === 0) {
+      console.warn(`Command Code provider: dropped ${dropped} unsupported part(s) in user message`)
+    }
+
+    const first = converted[0]
+    if (converted.length === 1 && first?.type === "text") {
+      return first.text
+    }
+
+    const textOnly = converted.filter((part): part is { type: "text"; text: string } => part.type === "text")
+    if (textOnly.length === converted.length) {
+      return textOnly.map((part) => part.text).join("\n")
+    }
+
+    return converted
   }
   return ""
 }
@@ -130,8 +195,7 @@ function convertToolResultOutput(output: LanguageModelV3ToolResultOutput): CCToo
 function convertMessage(msg: LanguageModelV3Message): CCMessage | null {
   switch (msg.role) {
     case "user": {
-      const text = extractText(msg.content)
-      return { role: "user", content: text }
+      return { role: "user", content: convertUserContent(msg.content) }
     }
     case "assistant": {
       const parts: CCAssistantContent[] = []
@@ -182,12 +246,6 @@ function convertTools(
       description: t.description,
       input_schema: t.inputSchema,
     }))
-}
-
-function getStringProperty(obj: unknown, key: string): string | undefined {
-  if (typeof obj !== "object" || obj === null) return undefined
-  const value = (obj as Record<string, unknown>)[key]
-  return typeof value === "string" ? value : undefined
 }
 
 function normalizeReasoningEffort(value: string | undefined): ReasoningEffort | undefined {

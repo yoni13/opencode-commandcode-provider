@@ -52,7 +52,42 @@ test("converts user message with array of text parts", () => {
   expect(req.params.messages[0]).toEqual({ role: "user", content: "line1\nline2" })
 })
 
-test("user message with non-text parts drops them silently", () => {
+test("converts user message with image URL part", () => {
+  const req = buildRequest("m", makeOpts({
+    prompt: [{
+      role: "user",
+      content: [
+        { type: "text", text: "hello" },
+        { type: "file", mediaType: "image/png", data: new URL("https://example.com/img.png") },
+      ],
+    }],
+  }))
+  expect(req.params.messages).toHaveLength(1)
+  const msg = req.params.messages[0] as { role: "user"; content: unknown[] }
+  expect(msg.content).toEqual([
+    { type: "text", text: "hello" },
+    { type: "image", image: "https://example.com/img.png" },
+  ])
+})
+
+test("converts user message with binary image part to data URL", () => {
+  const req = buildRequest("m", makeOpts({
+    prompt: [{
+      role: "user",
+      content: [
+        { type: "text", text: "describe" },
+        { type: "file", mediaType: "image/png", data: new Uint8Array([1, 2, 3]) },
+      ],
+    }],
+  }))
+  const msg = req.params.messages[0] as { role: "user"; content: unknown[] }
+  expect(msg.content).toEqual([
+    { type: "text", text: "describe" },
+    { type: "image", image: "data:image/png;base64,AQID" },
+  ])
+})
+
+test("converts legacy image user part", () => {
   const req = buildRequest("m", makeOpts({
     prompt: [{
       role: "user",
@@ -62,9 +97,11 @@ test("user message with non-text parts drops them silently", () => {
       ],
     }],
   }))
-  expect(req.params.messages).toHaveLength(1)
-  const msg = req.params.messages[0] as { role: "user"; content: string }
-  expect(msg.content).toBe("hello")
+  const msg = req.params.messages[0] as { role: "user"; content: unknown[] }
+  expect(msg.content).toEqual([
+    { type: "text", text: "hello" },
+    { type: "image", image: "https://example.com/img.png" },
+  ])
 })
 
 test("converts assistant message with text, reasoning, and tool-call parts", () => {

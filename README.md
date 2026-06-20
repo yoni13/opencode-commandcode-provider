@@ -95,6 +95,10 @@ await streamText({
 
 The provider sends this as `reasoning_effort` to Command Code. Supported values are `low`, `medium`, `high`, `xhigh`, and `max`, depending on the selected model. The generated [`models.json`](./models.json) records per-model support in `reasoning_efforts` and exposes them to opencode as model `variants`, so the opencode variant picker can select the effort when the installed opencode build supports variants.
 
+### Vision Inputs
+
+Models that Command Code publishes with image input support are exposed to opencode with `attachment: true` and `modalities.input: ["text", "image"]`. Image inputs from the AI SDK are forwarded as Command Code image content, including URL, data URL, base64 string, and `Uint8Array` file parts.
+
 ## Available Models
 
 | Model ID | Name | Tier | Reasoning | Context |
