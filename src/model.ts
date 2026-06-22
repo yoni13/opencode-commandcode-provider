@@ -65,6 +65,7 @@ export class CommandCodeLanguageModel implements LanguageModelV3 {
       "x-cli-environment": "production",
       "x-project-slug": this.projectSlug,
       "x-co-flag": "false",
+      "x-taste-learning": "false",
       "x-session-id": this.sessionId,
       ...this.opts.headers,
     }

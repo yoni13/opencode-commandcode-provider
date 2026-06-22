@@ -306,3 +306,19 @@ test("envelope has correct top-level shape", () => {
   expect(req).toHaveProperty("permissionMode", "standard")
   expect(req).toHaveProperty("params")
 })
+
+test("envelope includes CLI-shaped environment context", () => {
+  const req = buildRequest("m", makeOpts())
+
+  expect(req.config.workingDir).toBe(process.cwd())
+  expect(req.config.date).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+  expect(req.config.environment).toBe(`${process.platform}-${process.arch}`)
+  expect(Array.isArray(req.config.structure)).toBe(true)
+  expect(req.config.structure.every((entry) => typeof entry === "string")).toBe(true)
+  expect(typeof req.config.isGitRepo).toBe("boolean")
+  expect(typeof req.config.currentBranch).toBe("string")
+  expect(typeof req.config.mainBranch).toBe("string")
+  expect(typeof req.config.gitStatus).toBe("string")
+  expect(Array.isArray(req.config.recentCommits)).toBe(true)
+  expect(req.config.recentCommits.every((entry) => typeof entry === "string")).toBe(true)
+})

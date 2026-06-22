@@ -1,3 +1,5 @@
+import { execSync } from "child_process"
+import { readdirSync } from "fs"
 import type { LanguageModelV3CallOptions } from "@ai-sdk/provider"
 import type {
   LanguageModelV3FunctionTool,
@@ -43,12 +45,12 @@ interface CCRequestEnvelope {
     workingDir: string
     date: string
     environment: string
-    structure: unknown[]
+    structure: string[]
     isGitRepo: boolean
     currentBranch: string
     mainBranch: string
     gitStatus: string
-    recentCommits: unknown[]
+    recentCommits: string[]
   }
   memory: string
   taste: string
@@ -266,6 +268,130 @@ function getReasoningEffort(options: LanguageModelV3CallOptions): ReasoningEffor
   )
 }
 
+const STRUCTURE_IGNORES = new Set([
+  "node_modules",
+  "dist",
+  "build",
+  ".git",
+  ".svn",
+  ".hg",
+  "coverage",
+  ".nyc_output",
+  ".cache",
+  "tmp",
+  "temp",
+  ".next",
+  ".nuxt",
+  "out",
+])
+
+function getGitCommand(command: string): string {
+  return execSync(command, {
+    encoding: "utf8",
+    cwd: process.cwd(),
+    stdio: ["pipe", "pipe", "ignore"],
+  }).trim()
+}
+
+function isGitRepository(): boolean {
+  try {
+    execSync("git rev-parse --git-dir", {
+      cwd: process.cwd(),
+      stdio: "ignore",
+    })
+    return true
+  } catch {
+    return false
+  }
+}
+
+function getCurrentBranch(): string {
+  try {
+    return getGitCommand("git branch --show-current")
+  } catch {
+    return ""
+  }
+}
+
+function getMainBranch(): string {
+  try {
+    const branch = getGitCommand("git symbolic-ref --short refs/remotes/origin/HEAD")
+      .replace(/^origin\//, "")
+    if (branch) return branch
+  } catch {
+    // Fall back to common remote branch names below.
+  }
+
+  try {
+    const branches = getGitCommand("git branch -r")
+    if (branches.includes("origin/main")) return "main"
+    if (branches.includes("origin/master")) return "master"
+    return "main"
+  } catch {
+    return ""
+  }
+}
+
+function getGitStatus(): string {
+  try {
+    const status = getGitCommand("git status --porcelain")
+    if (!status) return "Working tree clean"
+
+    const lines = status.split("\n")
+    const modified = lines.filter((line) => line.startsWith(" M")).length
+    const added = lines.filter((line) => line.startsWith("A ")).length
+    const deleted = lines.filter((line) => line.startsWith(" D")).length
+    const untracked = lines.filter((line) => line.startsWith("??")).length
+    const parts: string[] = []
+
+    if (modified > 0) parts.push(`M ${modified}`)
+    if (added > 0) parts.push(`A ${added}`)
+    if (deleted > 0) parts.push(`D ${deleted}`)
+    if (untracked > 0) parts.push(`?? ${untracked}`)
+
+    return parts.join(", ") || status
+  } catch {
+    return ""
+  }
+}
+
+function getRecentCommits(): string[] {
+  try {
+    const commits = getGitCommand("git log --oneline -3")
+    return commits ? commits.split("\n") : []
+  } catch {
+    return []
+  }
+}
+
+function getRootDirectoryStructure(): string[] {
+  try {
+    return readdirSync(process.cwd(), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .filter((entry) => !entry.name.startsWith("."))
+      .filter((entry) => !STRUCTURE_IGNORES.has(entry.name))
+      .map((entry) => entry.name)
+      .sort()
+  } catch {
+    return []
+  }
+}
+
+function getEnvironmentContext(): CCRequestEnvelope["config"] {
+  const isGitRepo = isGitRepository()
+  return {
+    workingDir: process.cwd() ?? "/",
+    date: new Date().toISOString().split("T")[0] ?? "",
+    environment: `${process.platform}-${process.arch}`,
+    structure: getRootDirectoryStructure(),
+    isGitRepo,
+    currentBranch: isGitRepo ? getCurrentBranch() : "",
+    mainBranch: isGitRepo ? getMainBranch() : "",
+    gitStatus: isGitRepo ? getGitStatus() : "",
+    recentCommits: isGitRepo ? getRecentCommits() : [],
+  }
+}
+
 export function buildRequest(
   modelId: string,
   options: LanguageModelV3CallOptions,
@@ -298,20 +424,8 @@ export function buildRequest(
   if (reasoningEffort !== undefined) params.reasoning_effort = reasoningEffort
 
   return {
-    config: {
-      workingDir: process.cwd() ?? "/",
-      date: new Date().toISOString().split("T")[0] ?? "",
-      environment: `${process.platform}-${process.arch}`,
-      // Stub: opencode does not expose project structure context
-      structure: [],
-      isGitRepo: false,
-      currentBranch: "",
-      mainBranch: "",
-      gitStatus: "",
-      recentCommits: [],
-    },
+    config: getEnvironmentContext(),
     memory: "",
-    // Stub: taste/memory/permissionMode are Command Code CLI features not exposed via provider API
     taste: "",
     skills: null,
     permissionMode: "standard",

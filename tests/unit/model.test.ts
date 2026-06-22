@@ -54,6 +54,7 @@ test("doStream sends correct headers", async () => {
   expect(headers["x-cli-environment"]).toBe("production")
   expect(headers["x-project-slug"]).toBe("commandcode-provider")
   expect(headers["x-co-flag"]).toBe("false")
+  expect(headers["x-taste-learning"]).toBe("false")
   expect(typeof headers["x-session-id"]).toBe("string")
 })
 
