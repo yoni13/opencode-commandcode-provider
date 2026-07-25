@@ -49,6 +49,8 @@ interface SnEntry {
   reasoningEfforts?: string[]
   inputModalities?: string[]
   contextWindow?: number
+  maxOutputTokens?: number
+  hidden?: boolean
 }
 
 interface SiteCostEntry {
@@ -56,6 +58,7 @@ interface SiteCostEntry {
   input: number
   output: number
   cache_read?: number
+  cache_write?: number
 }
 
 const FALLBACK_COSTS: Record<string, { input: number; output: number; cache_read?: number; cache_write?: number }> = {
@@ -181,7 +184,9 @@ async function fetchLatestBundle(): Promise<{ source: string; version: string }>
   console.log("Extracting...")
   execSync(`tar -xzf "${tgzPath}" -C "${TMP_DIR}"`, { stdio: "pipe" })
 
-  const bundlePath = join(TMP_DIR, "package", "dist", "index.mjs")
+  const cliBundlePath = join(TMP_DIR, "package", "dist", "cli.mjs")
+  const indexBundlePath = join(TMP_DIR, "package", "dist", "index.mjs")
+  const bundlePath = existsSync(cliBundlePath) ? cliBundlePath : indexBundlePath
   if (!existsSync(bundlePath)) throw new Error(`Bundle not found at ${bundlePath}`)
 
   const source = readFileSync(bundlePath, "utf-8")
@@ -235,12 +240,54 @@ function parseSiteCostsFromBundle(source: string): Map<string, SiteCostEntry> {
     if (!title || !input || !output) continue
 
     const cacheRead = objectSource.match(/label:"Cache read",value:"\$?([0-9.]+)"/)?.[1]
+    const cacheWrite = objectSource.match(/label:"Cache write",value:"\$?([0-9.]+)"/)?.[1]
     const entry: SiteCostEntry = {
       title,
       input: Number(input),
       output: Number(output),
     }
     if (cacheRead) entry.cache_read = Number(cacheRead)
+    if (cacheWrite) entry.cache_write = Number(cacheWrite)
+
+    costs.set(`slug:${slug}`, entry)
+    costs.set(`title:${title.toLowerCase()}`, entry)
+  }
+
+  return costs
+}
+
+function parsePriceCell(value: string | undefined): number | undefined {
+  if (!value) return undefined
+  if (value.includes("Free")) return 0
+  const price = value.match(/\$([0-9]+(?:\.[0-9]+)?)/)?.[1]
+  return price === undefined ? undefined : Number(price)
+}
+
+function stripTags(value: string): string {
+  return value.replace(/<[^>]+>/g, "").trim()
+}
+
+function parseSiteCostsFromHtml(html: string): Map<string, SiteCostEntry> {
+  const costs = new Map<string, SiteCostEntry>()
+  const rows = html.matchAll(/<tr class="group hover:bg-white\/\[0\.03\]">([\s\S]*?)<\/tr>/g)
+
+  for (const rowMatch of rows) {
+    const row = rowMatch[1]
+    const slug = row.match(/href="\/models\/([^"]+)"/)?.[1]
+    const title = row.match(/<span class="truncate text-white group-hover:underline">([^<]+)<\/span>/)?.[1]
+    if (!slug || !title) continue
+
+    const cells = [...row.matchAll(/<span class="block leading-5(?: text-white)?">([\s\S]*?)<\/span>/g)]
+      .map((match) => stripTags(match[1]))
+    const input = parsePriceCell(cells[2])
+    const output = parsePriceCell(cells[3])
+    if (input === undefined || output === undefined) continue
+
+    const cacheRead = parsePriceCell(cells[4])
+    const cacheWrite = parsePriceCell(cells[5])
+    const entry: SiteCostEntry = { title, input, output }
+    if (cacheRead !== undefined) entry.cache_read = cacheRead
+    if (cacheWrite !== undefined) entry.cache_write = cacheWrite
 
     costs.set(`slug:${slug}`, entry)
     costs.set(`title:${title.toLowerCase()}`, entry)
@@ -255,7 +302,13 @@ async function fetchSiteCosts(): Promise<Map<string, SiteCostEntry>> {
   if (!pageResp.ok) throw new Error(`models page returned ${pageResp.status}`)
   const html = await pageResp.text()
 
-  const assetPaths = [...html.matchAll(/href="([^"]+\.js)"/g)]
+  const htmlCosts = parseSiteCostsFromHtml(html)
+  if (htmlCosts.size > 0) {
+    console.log(`  Found ${htmlCosts.size / 2} site pricing entries in SSR table`)
+    return htmlCosts
+  }
+
+  const assetPaths = [...html.matchAll(/(?:href|src)="([^"]+\.js(?:\?[^"]*)?)"/g)]
     .map((m) => m[1])
     .filter((path) => path.startsWith("/assets/"))
 
@@ -313,9 +366,21 @@ function extractWt(source: string): Record<string, string> {
   return evaluateWithContext(normalizeForEval(raw), {})
 }
 
+function getCatalogAnchor(source: string): string {
+  const anchors = [
+    'SONNET_5:{id:"claude-sonnet-5"',
+    'SONNET_4_6:{id:"claude-sonnet-4-6"',
+  ]
+
+  for (const anchor of anchors) {
+    if (source.includes(anchor)) return anchor
+  }
+
+  throw new Error("Could not find model catalog anchor")
+}
+
 function extractSpecConstants(source: string): { chatComplete: string; responses: string; qt: string } {
-  const anchorIdx = source.indexOf('SONNET_4_6:{id:"claude-sonnet-4-6"')
-  if (anchorIdx < 0) throw new Error("Could not find model catalog anchor")
+  const anchorIdx = source.indexOf(getCatalogAnchor(source))
 
   const before = source.slice(Math.max(0, anchorIdx - 5000), anchorIdx)
 
@@ -337,9 +402,21 @@ function escapeRegExp(input: string): string {
   return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
-function findStringAssignment(source: string, varName: string): string | undefined {
+function findStringAssignment(
+  source: string,
+  varName: string,
+  visited = new Set<string>(),
+): string | undefined {
+  if (visited.has(varName)) return undefined
+  visited.add(varName)
+
   const match = source.match(new RegExp(`\\b${escapeRegExp(varName)}="([^"]+)"`))
-  return match?.[1]
+  if (match) return match[1]
+
+  const alias = source.match(
+    new RegExp(`(?:^|[^\\w$])${escapeRegExp(varName)}=([A-Za-z_$][\\w$]*)(?:[,;])`),
+  )
+  return alias ? findStringAssignment(source, alias[1], visited) : undefined
 }
 
 function splitTopLevel(input: string): string[] {
@@ -427,7 +504,7 @@ function findWtAliasAssignment(
   wtName: string,
   wt: Record<string, string>,
 ): string | undefined {
-  const directMatch = source.match(new RegExp(`\\b${escapeRegExp(varName)}=([^,;]+)`))
+  const directMatch = source.match(new RegExp(`(?:^|[^\\w$])${escapeRegExp(varName)}=([^,;]+)`))
   if (!directMatch) return undefined
 
   const direct = resolveWtExpression(directMatch[1], wtName, wt)
@@ -460,8 +537,14 @@ function addCatalogContextConstants(
   for (const match of providerVars) {
     const varName = match[1]
     if (varName in context) continue
-    const value = findWtAliasAssignment(source, varName, wtName, wt)
+    const value = findStringAssignment(source, varName) ??
+      findWtAliasAssignment(source, varName, wtName, wt)
     if (value) context[varName] = value
+  }
+
+  for (const match of rawCatalog.matchAll(/\bhidden:([A-Za-z_$][\w$]*)\(\)/g)) {
+    const varName = match[1]
+    if (!(varName in context)) context[varName] = () => false
   }
 }
 
@@ -471,7 +554,7 @@ function extractModelCatalog(
   wtName: string,
   spec: ReturnType<typeof extractSpecConstants>,
 ): Record<string, SnEntry> {
-  const raw = findBalancedObject(source, 'SONNET_4_6:{id:"claude-sonnet-4-6"')
+  const raw = findBalancedObject(source, getCatalogAnchor(source))
   const ctx: Record<string, unknown> = { [wtName]: wt }
   ctx[spec.chatComplete] = "chatComplete"
   ctx[spec.responses] = "responses"
@@ -506,7 +589,15 @@ function extractCostData(source: string, wt: Record<string, string>, wtName: str
   }
 
   const raw = source.slice(start, end + 1)
-  return evaluateWithContext(normalizeForEval(raw), { [wtName]: wt }) as Record<string, CostEntry[]>
+  const context: Record<string, unknown> = { [wtName]: wt }
+  for (const match of raw.matchAll(/\[([A-Za-z_$][\w$]*)\]\s*:/g)) {
+    const varName = match[1]
+    if (varName in context) continue
+    const value = findStringAssignment(source, varName)
+    if (value) context[varName] = value
+  }
+
+  return evaluateWithContext(normalizeForEval(raw), context) as Record<string, CostEntry[]>
 }
 
 function getWtVarName(source: string): string {
@@ -552,16 +643,20 @@ function buildModelEntry(
   const siteCost = siteCosts.get(`slug:${toSiteSlug(entry.id)}`) ??
     siteCosts.get(`title:${entry.name.toLowerCase()}`)
   let cost: { input: number; output: number; cache_read?: number; cache_write?: number }
-  if (siteCost) {
+  if (entry.badge === "free") {
+    cost = { input: 0, output: 0 }
+  } else if (siteCost) {
     cost = {
       input: siteCost.input,
       output: siteCost.output,
-    }
+      }
     if (siteCost.cache_read !== undefined) cost.cache_read = siteCost.cache_read
     else if (costEntry?.cacheHitCost && costEntry.cacheHitCost > 0) {
       cost.cache_read = costEntry.cacheHitCost
     }
-    if (costEntry?.cacheWrite5mCost && costEntry.cacheWrite5mCost > 0) {
+    if (siteCost.cache_write !== undefined) {
+      cost.cache_write = siteCost.cache_write
+    } else if (costEntry?.cacheWrite5mCost && costEntry.cacheWrite5mCost > 0) {
       cost.cache_write = costEntry.cacheWrite5mCost
     }
   } else if (costEntry) {
@@ -575,15 +670,16 @@ function buildModelEntry(
     const fallback = FALLBACK_COSTS[entry.id]
     if (fallback) {
       cost = fallback
-    } else if (entry.badge === "free") {
-      cost = { input: 0, output: 0 }
     } else {
       cost = { input: 0, output: 0 }
     }
   }
 
   const limit = entry.contextWindow
-    ? { context: entry.contextWindow, output: FALLBACK_LIMITS[entry.id]?.output ?? 65536 }
+    ? {
+        context: entry.contextWindow,
+        output: entry.maxOutputTokens ?? FALLBACK_LIMITS[entry.id]?.output ?? 65536,
+      }
     : FALLBACK_LIMITS[entry.id] ?? { context: 200000, output: 65536 }
   const inputModalities = normalizeInputModalities(entry.inputModalities)
 

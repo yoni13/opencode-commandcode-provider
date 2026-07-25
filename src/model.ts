@@ -77,16 +77,29 @@ export class CommandCodeLanguageModel implements LanguageModelV3 {
       normalized.includes("credits exhausted") ||
       normalized.includes("credit balance") ||
       normalized.includes("quota exceeded") ||
-      normalized.includes("usage exceeded")
+      normalized.includes("usage exceeded") ||
+      normalized.includes("usage limit")
+  }
+
+  private stringifyErrorValue(value: unknown): string {
+    if (typeof value === "string") return value
+    try {
+      const json = JSON.stringify(value)
+      if (json !== undefined) return json
+    } catch {
+      // Fall back to JavaScript string coercion below.
+    }
+    return String(value)
   }
 
   private errorMessage(error: unknown): string {
     if (typeof error === "object" && error !== null) {
-      const message = (error as Record<string, unknown>).message
-      if (typeof message === "string") return message
-      return JSON.stringify(error)
+      const record = error as Record<string, unknown>
+      if ("message" in record) return this.stringifyErrorValue(record.message)
+      if ("error" in record) return this.errorMessage(record.error)
+      return this.stringifyErrorValue(error)
     }
-    return String(error)
+    return this.stringifyErrorValue(error)
   }
 
   private isRateLimitError(error: unknown, message: string): boolean {
@@ -189,8 +202,11 @@ export class CommandCodeLanguageModel implements LanguageModelV3 {
       let parsedBody: unknown
       try {
         parsedBody = JSON.parse(errorBody)
-        if ((parsedBody as any).error?.message) errorMessage = (parsedBody as any).error.message
-        else if ((parsedBody as any).message) errorMessage = (parsedBody as any).message
+        if (typeof parsedBody === "object" &&
+            parsedBody !== null &&
+            ("message" in parsedBody || "error" in parsedBody)) {
+          errorMessage = this.errorMessage(parsedBody)
+        }
       } catch {
         // intentionally silent: error body is not JSON
       }
@@ -460,7 +476,7 @@ export class CommandCodeLanguageModel implements LanguageModelV3 {
             break
           case "error":
             throw new Error(
-              `Command Code API stream error: ${typeof value.error === "object" && value.error !== null ? (value.error as Error).message ?? JSON.stringify(value.error) : value.error} [model=${this.modelId}]`,
+              `Command Code API stream error: ${this.errorMessage(value.error)} [model=${this.modelId}]`,
             )
         }
       }

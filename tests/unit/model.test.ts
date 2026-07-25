@@ -174,6 +174,22 @@ test("doStream throws descriptive error on non-OK response", async () => {
   restore()
 })
 
+test("doStream preserves object HTTP error messages as JSON", async () => {
+  const { restore } = mockFetchError(500, "Server Error", JSON.stringify({
+    error: { message: { code: "upstream_failed", detail: "provider unavailable" } },
+  }))
+  const model = new CommandCodeLanguageModel(MODEL_ID, { apiKey: API_KEY, maxRetries: 0 })
+  try {
+    await model.doStream(makeCallOptions())
+    expect.unreachable("Should have thrown")
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    expect(msg).toContain('"code":"upstream_failed"')
+    expect(msg).not.toContain("[object Object]")
+  }
+  restore()
+})
+
 test("doStream throws on HTTP error without JSON body", async () => {
   const { restore } = mockFetchError(500, "Internal Server Error")
   const model = new CommandCodeLanguageModel(MODEL_ID, { apiKey: API_KEY, maxRetries: 0 })
@@ -522,6 +538,22 @@ test("doGenerate handles tool calls", async () => {
   expect(result.content[0]).toMatchObject({ type: "text", text: "Let me run..." })
   expect(result.content[1]).toMatchObject({ type: "tool-call", toolCallId: "tc1", toolName: "bash" })
   expect(result.finishReason.unified).toBe("tool-calls")
+})
+
+test("doGenerate preserves object stream error messages as JSON", async () => {
+  const { restore } = mockFetchStream([
+    'data: {"type":"server_error","message":{"code":"upstream_failed","detail":"provider unavailable"}}\n\n',
+  ])
+  const model = new CommandCodeLanguageModel(MODEL_ID, { apiKey: API_KEY, maxRetries: 0 })
+  try {
+    await model.doGenerate(makeCallOptions())
+    expect.unreachable("Should have thrown")
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    expect(msg).toContain('"code":"upstream_failed"')
+    expect(msg).not.toContain("[object Object]")
+  }
+  restore()
 })
 
 test("doStream includes model ID in error messages", async () => {

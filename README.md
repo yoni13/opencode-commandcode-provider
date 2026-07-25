@@ -49,7 +49,10 @@ If you prefer to configure manually, add this to your `opencode.json`:
     "commandcode": {
       "npm": "https://github.com/yoni13/opencode-commandcode-provider",
       "name": "Command Code",
-      "env": ["COMMANDCODE_API_KEY"]
+      "env": ["COMMANDCODE_API_KEY"],
+      "options": {
+        "excludePremiumModels": true
+      }
     }
   },
   "model": "commandcode/deepseek-v4-flash"
@@ -57,6 +60,10 @@ If you prefer to configure manually, add this to your `opencode.json`:
 ```
 
 The plugin auto-registers models from [`models.json`](./models.json) at startup. You only need the `provider.commandcode` block — no need to list individual models.
+
+`excludePremiumModels: true` removes every model marked as premium from the opencode model picker. It defaults to `false`.
+
+The plugin checks this fork's latest `models.json` at startup and falls back to its bundled catalog if the request fails, times out, is invalid, or is older than the bundled catalog. Set `autoUpdateModels: false` under `provider.commandcode.options` to disable this check. A scheduled GitHub workflow refreshes the repository catalog daily from the latest Command Code CLI and pricing page.
 
 ### Environment Variable
 
@@ -107,28 +114,44 @@ Models that Command Code publishes with image input support are exposed to openc
 | `claude-haiku-4-5-20251001`                | [Premium] Claude Haiku 4.5  | premium      | no  | 200K   |
 | `claude-opus-4-7`                          | [Premium] Claude Opus 4.7   | premium      | yes | 1M     |
 | `claude-opus-4-8`                          | [Premium] Claude Opus 4.8   | premium      | yes | 1M     |
+| `claude-opus-5`                            | [Premium] Claude Opus 5     | premium      | yes | 1M     |
 | `claude-sonnet-4-6`                        | [Premium] Claude Sonnet 4.6 | premium      | yes | 1M     |
+| `claude-sonnet-5`                          | [Premium] Claude Sonnet 5   | premium      | yes | 1M     |
 | `google/gemini-3.1-flash-lite`             | [Premium] Gemini 3.1 Flash Lite | premium      | yes | 1M     |
 | `google/gemini-3.5-flash`                  | [Premium] Gemini 3.5 Flash  | premium      | yes | 1M     |
+| `google/gemini-3.5-flash-lite`             | [Premium] Gemini 3.5 Flash Lite | premium      | yes | 1M     |
+| `google/gemini-3.6-flash`                  | [Premium] Gemini 3.6 Flash  | premium      | yes | 1M     |
 | `gpt-5.3-codex`                            | [Premium] GPT-5.3 Codex     | premium      | yes | 400K   |
 | `gpt-5.4`                                  | [Premium] GPT-5.4           | premium      | yes | 400K   |
 | `gpt-5.4-mini`                             | [Premium] GPT-5.4 Mini      | premium      | yes | 400K   |
 | `gpt-5.5`                                  | [Premium] GPT-5.5           | premium      | yes | 256K   |
+| `gpt-5.6-luna`                             | [Premium] GPT-5.6 Luna      | premium      | yes | 1M     |
+| `gpt-5.6-sol`                              | [Premium] GPT-5.6 Sol       | premium      | yes | 1M     |
+| `gpt-5.6-terra`                            | [Premium] GPT-5.6 Terra     | premium      | yes | 1M     |
+| `poolside/laguna-s-2.1-free`               | [Free] Laguna S 2.1         | open-source  | yes | 256K   |
+| `inclusionai/ling-3.0-flash-free`          | [Free] Ling 3.0 Flash       | open-source  | yes | 256K   |
 | `MiniMaxAI/MiniMax-M3-Free`                | [Free] MiniMax M3           | open-source  | yes | 1M     |
+| `tencent/Hy3`                              | [Free] Tencent Hy3 (Free)   | open-source  | yes | 262K   |
 | `deepseek/deepseek-v4-flash`               | DeepSeek V4 Flash           | open-source  | yes | 1M     |
 | `deepseek/deepseek-v4-pro`                 | DeepSeek V4 Pro             | open-source  | yes | 1M     |
+| `sakana/fugu-ultra`                        | Fugu Ultra                  | open-source  | yes | 1M     |
 | `zai-org/GLM-5`                            | GLM-5                       | open-source  | no  | 200K   |
 | `zai-org/GLM-5.1`                          | GLM-5.1                     | open-source  | no  | 200K   |
-| `zai-org/GLM-5.2`                          | GLM-5.2                     | open-source  | no  | 1M     |
+| `zai-org/GLM-5.2`                          | GLM-5.2                     | open-source  | yes | 1M     |
+| `zai-org/GLM-5.2-Fast`                     | GLM-5.2 Fast                | open-source  | no  | 1M     |
+| `xai/grok-4.5`                             | Grok 4.5                    | open-source  | yes | 500K   |
+| `thinkingmachines/inkling`                 | Inkling                     | open-source  | yes | 256K   |
 | `moonshotai/Kimi-K2.5`                     | Kimi K2.5                   | open-source  | no  | 256K   |
 | `moonshotai/Kimi-K2.6`                     | Kimi K2.6                   | open-source  | no  | 256K   |
 | `moonshotai/Kimi-K2.7-Code`                | Kimi K2.7 Code              | open-source  | yes | 256K   |
 | `moonshotai/Kimi-K2.7-Code-Highspeed`      | Kimi K2.7 Code HighSpeed    | open-source  | yes | 262K   |
+| `moonshotai/Kimi-K3`                       | Kimi K3                     | open-source  | yes | 1M     |
 | `xiaomi/mimo-v2.5`                         | MiMo V2.5                   | open-source  | no  | 1M     |
 | `xiaomi/mimo-v2.5-pro`                     | MiMo V2.5 Pro               | open-source  | no  | 1M     |
 | `MiniMaxAI/MiniMax-M2.5`                   | MiniMax M2.5                | open-source  | no  | 200K   |
 | `MiniMaxAI/MiniMax-M2.7`                   | MiniMax M2.7                | open-source  | no  | 1M     |
 | `MiniMaxAI/MiniMax-M3`                     | MiniMax M3                  | open-source  | yes | 1M     |
+| `meta/muse-spark-1.1`                      | Muse Spark 1.1              | open-source  | yes | 1M     |
 | `nvidia/nemotron-3-ultra-550b-a55b`        | Nemotron 3 Ultra            | open-source  | yes | 1M     |
 | `Qwen/Qwen3.6-Max-Preview`                 | Qwen 3.6 Max Preview        | open-source  | yes | 1M     |
 | `Qwen/Qwen3.6-Plus`                        | Qwen 3.6 Plus               | open-source  | yes | 1M     |
@@ -136,6 +159,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `Qwen/Qwen3.7-Plus`                        | Qwen 3.7 Plus               | open-source  | yes | 1M     |
 | `stepfun/Step-3.5-Flash`                   | Step 3.5 Flash              | open-source  | yes | 1M     |
 | `stepfun/Step-3.7-Flash`                   | Step 3.7 Flash              | open-source  | yes | 256K   |
+| `tencent/hy3-paid`                         | Tencent Hy3                 | open-source  | yes | 262K   |
 
 Full model list is maintained in [`models.json`](./models.json). See [Sync Models](#sync-models) to refresh it from the latest Command Code CLI release.
 
