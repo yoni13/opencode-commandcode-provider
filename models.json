@@ -1570,6 +1570,31 @@
     }
   },
   {
+    "id": "Qwen/Qwen3.7-Flash",
+    "name": "Qwen 3.7 Flash",
+    "tier": "open-source",
+    "reasoning": true,
+    "modalities": {
+      "input": [
+        "text"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0.03,
+      "output": 0.1,
+      "cache_read": 0.2,
+      "cache_write": 0.13
+    },
+    "limit": {
+      "context": 1000000,
+      "output": 65536
+    }
+  },
+  {
     "id": "Qwen/Qwen3.7-Max",
     "name": "Qwen 3.7 Max",
     "tier": "open-source",
