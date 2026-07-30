@@ -1574,9 +1574,11 @@
     "name": "Qwen 3.7 Flash",
     "tier": "open-source",
     "reasoning": true,
+    "attachment": true,
     "modalities": {
       "input": [
-        "text"
+        "text",
+        "image"
       ],
       "output": [
         "text"
