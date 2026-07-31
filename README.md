@@ -141,6 +141,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `zai-org/GLM-5.2-Fast`                     | GLM-5.2 Fast                | open-source  | no  | 1M     |
 | `xai/grok-4.5`                             | Grok 4.5                    | open-source  | yes | 500K   |
 | `thinkingmachines/inkling`                 | Inkling                     | open-source  | yes | 256K   |
+| `thinkingmachines/inkling-small`           | Inkling Small               | open-source  | yes | 1M     |
 | `moonshotai/Kimi-K2.5`                     | Kimi K2.5                   | open-source  | no  | 256K   |
 | `moonshotai/Kimi-K2.6`                     | Kimi K2.6                   | open-source  | no  | 256K   |
 | `moonshotai/Kimi-K2.7-Code`                | Kimi K2.7 Code              | open-source  | yes | 256K   |

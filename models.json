@@ -1214,6 +1214,32 @@
     }
   },
   {
+    "id": "thinkingmachines/inkling-small",
+    "name": "Inkling Small",
+    "tier": "open-source",
+    "reasoning": true,
+    "attachment": true,
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0.5,
+      "output": 1.2,
+      "cache_read": 0.1
+    },
+    "limit": {
+      "context": 1000000,
+      "output": 65536
+    }
+  },
+  {
     "id": "moonshotai/Kimi-K2.5",
     "name": "Kimi K2.5",
     "tier": "open-source",
