@@ -1675,6 +1675,49 @@
     }
   },
   {
+    "id": "Qwen/Qwen3.8-Max",
+    "name": "Qwen 3.8 Max",
+    "tier": "open-source",
+    "reasoning": true,
+    "attachment": true,
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "xhigh"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "xhigh": {
+        "reasoningEffort": "xhigh"
+      }
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 2,
+      "output": 6,
+      "cache_read": 0.25,
+      "cache_write": 2.5
+    },
+    "limit": {
+      "context": 1000000,
+      "output": 65536
+    }
+  },
+  {
     "id": "stepfun/Step-3.5-Flash",
     "name": "Step 3.5 Flash",
     "tier": "open-source",
