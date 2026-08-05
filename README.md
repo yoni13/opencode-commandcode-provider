@@ -130,7 +130,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `inclusionai/ling-3.0-flash-free`          | [Free] Ling 3.0 Flash       | open-source  | yes | 256K   |
 | `MiniMaxAI/MiniMax-M3-Free`                | [Free] MiniMax M3           | open-source  | yes | 1M     |
 | `tencent/Hy3`                              | [Free] Tencent Hy3 (Free)   | open-source  | yes | 262K   |
-| `deepseek/deepseek-v4-flash`               | DeepSeek V4 Flash           | open-source  | yes | 1M     |
+| `deepseek/deepseek-v4-flash`               | DeepSeek V4 Flash (latest)  | open-source  | yes | 1M     |
 | `deepseek/deepseek-v4-pro`                 | DeepSeek V4 Pro             | open-source  | yes | 1M     |
 | `sakana/fugu-ultra`                        | Fugu Ultra                  | open-source  | yes | 1M     |
 | `zai-org/GLM-5`                            | GLM-5                       | open-source  | no  | 200K   |
