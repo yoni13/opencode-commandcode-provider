@@ -1502,6 +1502,56 @@
     }
   },
   {
+    "id": "meta/muse-spark-1.2",
+    "name": "Muse Spark 1.2",
+    "tier": "open-source",
+    "reasoning": true,
+    "attachment": true,
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 1048576,
+      "output": 65536
+    }
+  },
+  {
+    "id": "meta/muse-spark-1.2-contributor",
+    "name": "Muse Spark 1.2 Contributor",
+    "tier": "open-source",
+    "reasoning": true,
+    "attachment": true,
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 1048576,
+      "output": 65536
+    }
+  },
+  {
     "id": "nvidia/nemotron-3-ultra-550b-a55b",
     "name": "Nemotron 3 Ultra",
     "tier": "open-source",
