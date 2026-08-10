@@ -402,7 +402,7 @@ function escapeRegExp(input: string): string {
   return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
-function findStringAssignment(
+export function findStringAssignment(
   source: string,
   varName: string,
   visited = new Set<string>(),
@@ -410,7 +410,9 @@ function findStringAssignment(
   if (visited.has(varName)) return undefined
   visited.add(varName)
 
-  const match = source.match(new RegExp(`\\b${escapeRegExp(varName)}="([^"]+)"`))
+  const match = source.match(
+    new RegExp(`(?:^|[^\\w$])${escapeRegExp(varName)}="([^"]+)"`),
+  )
   if (match) return match[1]
 
   const alias = source.match(
@@ -871,4 +873,6 @@ async function main() {
   console.log("\nDone.")
 }
 
-main()
+if (import.meta.main) {
+  main()
+}
