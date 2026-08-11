@@ -1348,8 +1348,9 @@
     },
     "tool_call": true,
     "cost": {
-      "input": 0,
-      "output": 0
+      "input": 3,
+      "output": 15,
+      "cache_read": 0.3
     },
     "limit": {
       "context": 1000000,
