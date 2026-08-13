@@ -861,7 +861,7 @@
   },
   {
     "id": "deepseek/deepseek-v4-pro",
-    "name": "DeepSeek V4 Pro",
+    "name": "DeepSeek V4 Pro (latest)",
     "tier": "open-source",
     "reasoning": true,
     "modalities": {
@@ -1168,6 +1168,49 @@
       },
       "high": {
         "reasoningEffort": "high"
+      }
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 500000,
+      "output": 65536
+    }
+  },
+  {
+    "id": "xai/grok-4.6",
+    "name": "Grok 4.6",
+    "tier": "open-source",
+    "reasoning": true,
+    "modalities": {
+      "input": [
+        "text"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "xhigh": {
+        "reasoningEffort": "xhigh"
       }
     },
     "tool_call": true,
