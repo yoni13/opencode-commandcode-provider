@@ -121,6 +121,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `google/gemini-3.5-flash`                  | [Premium] Gemini 3.5 Flash  | premium      | yes | 1M     |
 | `google/gemini-3.5-flash-lite`             | [Premium] Gemini 3.5 Flash Lite | premium      | yes | 1M     |
 | `google/gemini-3.6-flash`                  | [Premium] Gemini 3.6 Flash  | premium      | yes | 1M     |
+| `google/gemini-3.7-flash`                  | [Premium] Gemini 3.7 Flash  | premium      | yes | 1M     |
 | `gpt-5.3-codex`                            | [Premium] GPT-5.3 Codex     | premium      | yes | 400K   |
 | `gpt-5.4`                                  | [Premium] GPT-5.4           | premium      | yes | 400K   |
 | `gpt-5.4-mini`                             | [Premium] GPT-5.4 Mini      | premium      | yes | 400K   |
