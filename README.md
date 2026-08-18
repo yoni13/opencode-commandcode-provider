@@ -126,7 +126,6 @@ Models that Command Code publishes with image input support are exposed to openc
 | `gpt-5.4`                                  | [Premium] GPT-5.4           | premium      | yes | 400K   |
 | `gpt-5.4-mini`                             | [Premium] GPT-5.4 Mini      | premium      | yes | 400K   |
 | `gpt-5.5`                                  | [Premium] GPT-5.5           | premium      | yes | 256K   |
-| `gpt-5.6-sol`                              | [Premium] GPT-5.6 Sol       | premium      | yes | 1M     |
 | `poolside/laguna-s-2.1-free`               | [Free] Laguna S 2.1         | open-source  | yes | 256K   |
 | `inclusionai/ling-3.0-flash-free`          | [Free] Ling 3.0 Flash       | open-source  | yes | 256K   |
 | `MiniMaxAI/MiniMax-M3-Free`                | [Free] MiniMax M3           | open-source  | yes | 1M     |
@@ -140,6 +139,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `zai-org/GLM-5.2-Fast`                     | GLM-5.2 Fast                | open-source  | no  | 1M     |
 | `zai-org/GLM-5.3`                          | GLM-5.3                     | open-source  | yes | 1M     |
 | `gpt-5.6-luna`                             | GPT-5.6 Luna                | open-source  | yes | 1M     |
+| `gpt-5.6-sol`                              | GPT-5.6 Sol                 | open-source  | yes | 1M     |
 | `gpt-5.6-terra`                            | GPT-5.6 Terra               | open-source  | yes | 1M     |
 | `xai/grok-4.5`                             | Grok 4.5                    | open-source  | yes | 500K   |
 | `xai/grok-4.6`                             | Grok 4.6                    | open-source  | yes | 500K   |
