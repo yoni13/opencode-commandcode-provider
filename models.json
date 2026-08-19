@@ -1825,6 +1825,47 @@
     }
   },
   {
+    "id": "Qwen/Qwen3.8-27B",
+    "name": "Qwen 3.8 27B",
+    "tier": "open-source",
+    "reasoning": true,
+    "attachment": true,
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "xhigh"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "xhigh": {
+        "reasoningEffort": "xhigh"
+      }
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 262144,
+      "output": 262144
+    }
+  },
+  {
     "id": "Qwen/Qwen3.8-Max",
     "name": "Qwen 3.8 Max",
     "tier": "open-source",

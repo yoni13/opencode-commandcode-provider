@@ -164,6 +164,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `Qwen/Qwen3.7-Flash`                       | Qwen 3.7 Flash              | open-source  | yes | 1M     |
 | `Qwen/Qwen3.7-Max`                         | Qwen 3.7 Max                | open-source  | yes | 1M     |
 | `Qwen/Qwen3.7-Plus`                        | Qwen 3.7 Plus               | open-source  | yes | 1M     |
+| `Qwen/Qwen3.8-27B`                         | Qwen 3.8 27B                | open-source  | yes | 262K   |
 | `Qwen/Qwen3.8-Max`                         | Qwen 3.8 Max                | open-source  | yes | 1M     |
 | `stepfun/Step-3.5-Flash`                   | Step 3.5 Flash              | open-source  | yes | 1M     |
 | `stepfun/Step-3.7-Flash`                   | Step 3.7 Flash              | open-source  | yes | 256K   |
