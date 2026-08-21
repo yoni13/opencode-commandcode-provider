@@ -715,7 +715,7 @@
       "cache_read": 0.5
     },
     "limit": {
-      "context": 256000,
+      "context": 400000,
       "output": 128000
     }
   },
@@ -1058,8 +1058,9 @@
     },
     "tool_call": true,
     "cost": {
-      "input": 0,
-      "output": 0
+      "input": 1.4,
+      "output": 4.4,
+      "cache_read": 0.26
     },
     "limit": {
       "context": 1000000,
