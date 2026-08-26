@@ -128,7 +128,9 @@ Models that Command Code publishes with image input support are exposed to openc
 | `gpt-5.5`                                  | [Premium] GPT-5.5           | premium      | yes | 400K   |
 | `poolside/laguna-s-2.1-free`               | [Free] Laguna S 2.1         | open-source  | yes | 256K   |
 | `inclusionai/ling-3.0-flash-free`          | [Free] Ling 3.0 Flash       | open-source  | yes | 256K   |
+| `minimax/minimax-m2.7-free`                | [Free] MiniMax M2.7         | open-source  | no  | 197K   |
 | `MiniMaxAI/MiniMax-M3-Free`                | [Free] MiniMax M3           | open-source  | yes | 1M     |
+| `minimax/minimax-m3-free`                  | [Free] MiniMax M3           | open-source  | yes | 1M     |
 | `stealth/ox-alpha`                         | [Free] Ox Alpha             | open-source  | yes | 1M     |
 | `tencent/Hy3`                              | [Free] Tencent Hy3 (Free)   | open-source  | yes | 262K   |
 | `deepseek/deepseek-v4-flash`               | DeepSeek V4 Flash (latest)  | open-source  | yes | 1M     |
