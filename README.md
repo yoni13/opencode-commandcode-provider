@@ -131,7 +131,6 @@ Models that Command Code publishes with image input support are exposed to openc
 | `minimax/minimax-m2.7-free`                | [Free] MiniMax M2.7         | open-source  | no  | 197K   |
 | `MiniMaxAI/MiniMax-M3-Free`                | [Free] MiniMax M3           | open-source  | yes | 1M     |
 | `minimax/minimax-m3-free`                  | [Free] MiniMax M3           | open-source  | yes | 1M     |
-| `stealth/ox-alpha`                         | [Free] Ox Alpha             | open-source  | yes | 1M     |
 | `tencent/Hy3`                              | [Free] Tencent Hy3 (Free)   | open-source  | yes | 262K   |
 | `deepseek/deepseek-v4-flash`               | DeepSeek V4 Flash (latest)  | open-source  | yes | 1M     |
 | `deepseek/deepseek-v4-flash-vision-exp`    | DeepSeek V4 Flash Vision (exp) | open-source  | yes | 1M     |
@@ -142,6 +141,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `zai-org/GLM-5.2`                          | GLM-5.2                     | open-source  | yes | 1M     |
 | `zai-org/GLM-5.2-Fast`                     | GLM-5.2 Fast                | open-source  | no  | 1M     |
 | `zai-org/GLM-5.3`                          | GLM-5.3                     | open-source  | yes | 1M     |
+| `z-ai/glm-5.3-flash`                       | GLM-5.3 Flash               | open-source  | yes | 1M     |
 | `gpt-5.6-luna`                             | GPT-5.6 Luna                | open-source  | yes | 1M     |
 | `gpt-5.6-sol`                              | GPT-5.6 Sol                 | open-source  | yes | 1M     |
 | `gpt-5.6-terra`                            | GPT-5.6 Terra               | open-source  | yes | 1M     |
@@ -169,6 +169,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `Qwen/Qwen3.7-Max`                         | Qwen 3.7 Max                | open-source  | yes | 1M     |
 | `Qwen/Qwen3.7-Plus`                        | Qwen 3.7 Plus               | open-source  | yes | 1M     |
 | `Qwen/Qwen3.8-27B`                         | Qwen 3.8 27B                | open-source  | yes | 262K   |
+| `Qwen/Qwen3.8-Flash`                       | Qwen 3.8 Flash              | open-source  | yes | 1M     |
 | `Qwen/Qwen3.8-Max`                         | Qwen 3.8 Max                | open-source  | yes | 1M     |
 | `stepfun/Step-3.5-Flash`                   | Step 3.5 Flash              | open-source  | yes | 1M     |
 | `stepfun/Step-3.7-Flash`                   | Step 3.7 Flash              | open-source  | yes | 256K   |
