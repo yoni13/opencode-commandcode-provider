@@ -2145,5 +2145,44 @@
       "context": 262144,
       "output": 65536
     }
+  },
+  {
+    "id": "tencent/hy4-preview",
+    "name": "Tencent Hy4 Preview",
+    "tier": "open-source",
+    "reasoning": true,
+    "modalities": {
+      "input": [
+        "text"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      }
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 1048576,
+      "output": 65536
+    }
   }
 ]

@@ -174,6 +174,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `stepfun/Step-3.5-Flash`                   | Step 3.5 Flash              | open-source  | yes | 1M     |
 | `stepfun/Step-3.7-Flash`                   | Step 3.7 Flash              | open-source  | yes | 256K   |
 | `tencent/hy3-paid`                         | Tencent Hy3                 | open-source  | yes | 262K   |
+| `tencent/hy4-preview`                      | Tencent Hy4 Preview         | open-source  | yes | 1M     |
 
 Full model list is maintained in [`models.json`](./models.json). See [Sync Models](#sync-models) to refresh it from the latest Command Code CLI release.
 
