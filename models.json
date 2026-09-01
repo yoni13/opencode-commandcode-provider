@@ -767,7 +767,7 @@
   },
   {
     "id": "minimax/minimax-m2.7-free",
-    "name": "[Free] MiniMax M2.7",
+    "name": "[Free] MiniMax M2.7 (Free)",
     "tier": "open-source",
     "reasoning": false,
     "modalities": {
@@ -815,7 +815,7 @@
   },
   {
     "id": "minimax/minimax-m3-free",
-    "name": "[Free] MiniMax M3",
+    "name": "[Free] MiniMax M3 (Free)",
     "tier": "open-source",
     "reasoning": true,
     "attachment": true,
@@ -895,6 +895,45 @@
     "limit": {
       "context": 1000000,
       "output": 384000
+    }
+  },
+  {
+    "id": "deepseek/deepseek-v4-flash-fast",
+    "name": "DeepSeek V4 Flash Fast",
+    "tier": "open-source",
+    "reasoning": true,
+    "modalities": {
+      "input": [
+        "text"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "reasoning_efforts": [
+      "low",
+      "high",
+      "max"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "max": {
+        "reasoningEffort": "max"
+      }
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 1000000,
+      "output": 65536
     }
   },
   {
