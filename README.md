@@ -111,6 +111,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | Model ID | Name | Tier | Reasoning | Context |
 |---|---|---|---|---|
 | `claude-fable-5`                           | [Premium] Claude Fable 5    | premium      | yes | 1M     |
+| `claude-fable-5-1`                         | [Premium] Claude Fable 5.1  | premium      | yes | 1M     |
 | `claude-haiku-4-5-20251001`                | [Premium] Claude Haiku 4.5  | premium      | no  | 200K   |
 | `claude-opus-4-7`                          | [Premium] Claude Opus 4.7   | premium      | yes | 1M     |
 | `claude-opus-4-8`                          | [Premium] Claude Opus 4.8   | premium      | yes | 1M     |
