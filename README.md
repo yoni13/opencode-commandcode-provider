@@ -123,12 +123,14 @@ Models that Command Code publishes with image input support are exposed to openc
 | `google/gemini-3.5-flash-lite`             | [Premium] Gemini 3.5 Flash Lite | premium      | yes | 1M     |
 | `google/gemini-3.6-flash`                  | [Premium] Gemini 3.6 Flash  | premium      | yes | 1M     |
 | `google/gemini-3.7-flash`                  | [Premium] Gemini 3.7 Flash  | premium      | yes | 1M     |
+| `google/gemini-3.8-flash`                  | [Premium] Gemini 3.8 Flash  | premium      | yes | 1M     |
 | `gpt-5.3-codex`                            | [Premium] GPT-5.3 Codex     | premium      | yes | 400K   |
 | `gpt-5.4`                                  | [Premium] GPT-5.4           | premium      | yes | 400K   |
 | `gpt-5.4-mini`                             | [Premium] GPT-5.4 Mini      | premium      | yes | 400K   |
 | `gpt-5.5`                                  | [Premium] GPT-5.5           | premium      | yes | 400K   |
 | `poolside/laguna-s-2.1-free`               | [Free] Laguna S 2.1         | open-source  | yes | 256K   |
 | `inclusionai/ling-3.0-flash-free`          | [Free] Ling 3.0 Flash       | open-source  | yes | 256K   |
+| `meituan/LongCat-2.0:free`                 | [Free] LongCat 2.0          | open-source  | yes | 1M     |
 | `minimax/minimax-m2.7-free`                | [Free] MiniMax M2.7 (Free)  | open-source  | no  | 197K   |
 | `MiniMaxAI/MiniMax-M3-Free`                | [Free] MiniMax M3           | open-source  | yes | 1M     |
 | `minimax/minimax-m3-free`                  | [Free] MiniMax M3 (Free)    | open-source  | yes | 1M     |
@@ -164,6 +166,8 @@ Models that Command Code publishes with image input support are exposed to openc
 | `meta/muse-spark-1.1`                      | Muse Spark 1.1              | open-source  | yes | 1M     |
 | `meta/muse-spark-1.2`                      | Muse Spark 1.2              | open-source  | yes | 1M     |
 | `meta/muse-spark-1.2-contributor`          | Muse Spark 1.2 Contributor  | open-source  | yes | 1M     |
+| `meta/muse-spark-1.3`                      | Muse Spark 1.3              | open-source  | yes | 1M     |
+| `meta/muse-spark-1.3-contributor`          | Muse Spark 1.3 Contributor  | open-source  | yes | 1M     |
 | `nvidia/nemotron-3-ultra-550b-a55b`        | Nemotron 3 Ultra            | open-source  | yes | 1M     |
 | `Qwen/Qwen3.6-Max-Preview`                 | Qwen 3.6 Max Preview        | open-source  | yes | 1M     |
 | `Qwen/Qwen3.6-Plus`                        | Qwen 3.6 Plus               | open-source  | yes | 1M     |
@@ -173,6 +177,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `Qwen/Qwen3.8-27B`                         | Qwen 3.8 27B                | open-source  | yes | 262K   |
 | `Qwen/Qwen3.8-Flash`                       | Qwen 3.8 Flash              | open-source  | yes | 1M     |
 | `Qwen/Qwen3.8-Max`                         | Qwen 3.8 Max                | open-source  | yes | 1M     |
+| `Qwen/Qwen3.8-Max-0902`                    | Qwen 3.8 Max 0902           | open-source  | yes | 1M     |
 | `stepfun/Step-3.5-Flash`                   | Step 3.5 Flash              | open-source  | yes | 1M     |
 | `stepfun/Step-3.7-Flash`                   | Step 3.7 Flash              | open-source  | yes | 256K   |
 | `tencent/hy3-paid`                         | Tencent Hy3                 | open-source  | yes | 262K   |
