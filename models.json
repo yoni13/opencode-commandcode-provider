@@ -812,6 +812,57 @@
     }
   },
   {
+    "id": "gpt-6-astra",
+    "name": "[Premium] GPT-6 Astra",
+    "tier": "premium",
+    "reasoning": true,
+    "attachment": true,
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "xhigh": {
+        "reasoningEffort": "xhigh"
+      },
+      "max": {
+        "reasoningEffort": "max"
+      }
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 10,
+      "output": 50,
+      "cache_read": 1,
+      "cache_write": 12.5
+    },
+    "limit": {
+      "context": 1050000,
+      "output": 65536
+    }
+  },
+  {
     "id": "poolside/laguna-s-2.1-free",
     "name": "[Free] Laguna S 2.1",
     "tier": "open-source",
@@ -2053,7 +2104,8 @@
       "low",
       "medium",
       "high",
-      "xhigh"
+      "xhigh",
+      "max"
     ],
     "variants": {
       "low": {
@@ -2067,6 +2119,9 @@
       },
       "xhigh": {
         "reasoningEffort": "xhigh"
+      },
+      "max": {
+        "reasoningEffort": "max"
       }
     },
     "tool_call": true,

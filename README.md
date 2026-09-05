@@ -128,6 +128,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `gpt-5.4`                                  | [Premium] GPT-5.4           | premium      | yes | 400K   |
 | `gpt-5.4-mini`                             | [Premium] GPT-5.4 Mini      | premium      | yes | 400K   |
 | `gpt-5.5`                                  | [Premium] GPT-5.5           | premium      | yes | 400K   |
+| `gpt-6-astra`                              | [Premium] GPT-6 Astra       | premium      | yes | 1M     |
 | `poolside/laguna-s-2.1-free`               | [Free] Laguna S 2.1         | open-source  | yes | 256K   |
 | `inclusionai/ling-3.0-flash-free`          | [Free] Ling 3.0 Flash       | open-source  | yes | 256K   |
 | `meituan/LongCat-2.0:free`                 | [Free] LongCat 2.0          | open-source  | yes | 1M     |
