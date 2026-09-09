@@ -969,6 +969,22 @@
         "text"
       ]
     },
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      }
+    },
     "tool_call": true,
     "cost": {
       "input": 0,
@@ -993,6 +1009,22 @@
       "output": [
         "text"
       ]
+    },
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      }
     },
     "tool_call": true,
     "cost": {
@@ -1939,6 +1971,22 @@
       "output": [
         "text"
       ]
+    },
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      }
     },
     "tool_call": true,
     "cost": {
