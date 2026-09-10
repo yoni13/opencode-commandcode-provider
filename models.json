@@ -909,6 +909,29 @@
     }
   },
   {
+    "id": "inclusionai/ling-3.0-flash-sante:free",
+    "name": "[Free] Ling 3.0 Flash Sante",
+    "tier": "open-source",
+    "reasoning": true,
+    "modalities": {
+      "input": [
+        "text"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 262144,
+      "output": 32768
+    }
+  },
+  {
     "id": "meituan/LongCat-2.0:free",
     "name": "[Free] LongCat 2.0",
     "tier": "open-source",
@@ -1205,6 +1228,47 @@
     "limit": {
       "context": 1000000,
       "output": 384000
+    }
+  },
+  {
+    "id": "deepseek/deepseek-v4.1-flash",
+    "name": "DeepSeek V4.1 Flash",
+    "tier": "open-source",
+    "reasoning": true,
+    "attachment": true,
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "reasoning_efforts": [
+      "low",
+      "high",
+      "max"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "max": {
+        "reasoningEffort": "max"
+      }
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 1000000,
+      "output": 65536
     }
   },
   {

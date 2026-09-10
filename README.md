@@ -131,6 +131,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `gpt-6-astra`                              | [Premium] GPT-6 Astra       | premium      | yes | 1M     |
 | `poolside/laguna-s-2.1-free`               | [Free] Laguna S 2.1         | open-source  | yes | 256K   |
 | `inclusionai/ling-3.0-flash-free`          | [Free] Ling 3.0 Flash       | open-source  | yes | 256K   |
+| `inclusionai/ling-3.0-flash-sante:free`    | [Free] Ling 3.0 Flash Sante | open-source  | yes | 262K   |
 | `meituan/LongCat-2.0:free`                 | [Free] LongCat 2.0          | open-source  | yes | 1M     |
 | `minimax/minimax-m2.7-free`                | [Free] MiniMax M2.7 (Free)  | open-source  | no  | 197K   |
 | `MiniMaxAI/MiniMax-M3-Free`                | [Free] MiniMax M3           | open-source  | yes | 1M     |
@@ -140,6 +141,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `deepseek/deepseek-v4-flash-fast`          | DeepSeek V4 Flash Fast      | open-source  | yes | 1M     |
 | `deepseek/deepseek-v4-flash-vision-exp`    | DeepSeek V4 Flash Vision (exp) | open-source  | yes | 1M     |
 | `deepseek/deepseek-v4-pro`                 | DeepSeek V4 Pro (latest)    | open-source  | yes | 1M     |
+| `deepseek/deepseek-v4.1-flash`             | DeepSeek V4.1 Flash         | open-source  | yes | 1M     |
 | `sakana/fugu-ultra`                        | Fugu Ultra                  | open-source  | yes | 1M     |
 | `zai-org/GLM-5`                            | GLM-5                       | open-source  | no  | 200K   |
 | `zai-org/GLM-5.1`                          | GLM-5.1                     | open-source  | no  | 200K   |
