@@ -181,6 +181,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `Qwen/Qwen3.8-Flash`                       | Qwen 3.8 Flash              | open-source  | yes | 1M     |
 | `Qwen/Qwen3.8-Max`                         | Qwen 3.8 Max                | open-source  | yes | 1M     |
 | `Qwen/Qwen3.8-Max-0902`                    | Qwen 3.8 Max 0902           | open-source  | yes | 1M     |
+| `Qwen/Qwen3.8-Omni-Flash`                  | Qwen 3.8 Omni Flash         | open-source  | yes | 1M     |
 | `stepfun/Step-3.5-Flash`                   | Step 3.5 Flash              | open-source  | yes | 1M     |
 | `stepfun/Step-3.7-Flash`                   | Step 3.7 Flash              | open-source  | yes | 256K   |
 | `tencent/hy3-paid`                         | Tencent Hy3                 | open-source  | yes | 262K   |
