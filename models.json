@@ -933,7 +933,7 @@
   },
   {
     "id": "meituan/LongCat-2.0:free",
-    "name": "[Free] LongCat 2.0",
+    "name": "[Free] LongCat 2.0 (Free)",
     "tier": "open-source",
     "reasoning": true,
     "modalities": {
@@ -1495,6 +1495,47 @@
     }
   },
   {
+    "id": "z-ai/glm-5.3-flashx",
+    "name": "GLM-5.3 FlashX",
+    "tier": "open-source",
+    "reasoning": true,
+    "attachment": true,
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "reasoning_efforts": [
+      "low",
+      "high",
+      "max"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "max": {
+        "reasoningEffort": "max"
+      }
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 1000000,
+      "output": 131072
+    }
+  },
+  {
     "id": "gpt-5.6-luna",
     "name": "GPT-5.6 Luna",
     "tier": "open-source",
@@ -1923,6 +1964,29 @@
     },
     "limit": {
       "context": 1000000,
+      "output": 65536
+    }
+  },
+  {
+    "id": "meituan/LongCat-2.0",
+    "name": "LongCat 2.0",
+    "tier": "open-source",
+    "reasoning": true,
+    "modalities": {
+      "input": [
+        "text"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 1048576,
       "output": 65536
     }
   },

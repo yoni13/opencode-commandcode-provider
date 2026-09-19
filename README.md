@@ -132,7 +132,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `poolside/laguna-s-2.1-free`               | [Free] Laguna S 2.1         | open-source  | yes | 256K   |
 | `inclusionai/ling-3.0-flash-free`          | [Free] Ling 3.0 Flash       | open-source  | yes | 256K   |
 | `inclusionai/ling-3.0-flash-sante:free`    | [Free] Ling 3.0 Flash Sante | open-source  | yes | 262K   |
-| `meituan/LongCat-2.0:free`                 | [Free] LongCat 2.0          | open-source  | yes | 1M     |
+| `meituan/LongCat-2.0:free`                 | [Free] LongCat 2.0 (Free)   | open-source  | yes | 1M     |
 | `minimax/minimax-m2.7-free`                | [Free] MiniMax M2.7 (Free)  | open-source  | no  | 197K   |
 | `MiniMaxAI/MiniMax-M3-Free`                | [Free] MiniMax M3           | open-source  | yes | 1M     |
 | `minimax/minimax-m3-free`                  | [Free] MiniMax M3 (Free)    | open-source  | yes | 1M     |
@@ -149,6 +149,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `zai-org/GLM-5.2-Fast`                     | GLM-5.2 Fast                | open-source  | no  | 1M     |
 | `zai-org/GLM-5.3`                          | GLM-5.3                     | open-source  | yes | 1M     |
 | `z-ai/glm-5.3-flash`                       | GLM-5.3 Flash               | open-source  | yes | 1M     |
+| `z-ai/glm-5.3-flashx`                      | GLM-5.3 FlashX              | open-source  | yes | 1M     |
 | `gpt-5.6-luna`                             | GPT-5.6 Luna                | open-source  | yes | 1M     |
 | `gpt-5.6-sol`                              | GPT-5.6 Sol                 | open-source  | yes | 1M     |
 | `gpt-5.6-terra`                            | GPT-5.6 Terra               | open-source  | yes | 1M     |
@@ -161,6 +162,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `moonshotai/Kimi-K2.7-Code`                | Kimi K2.7 Code              | open-source  | yes | 256K   |
 | `moonshotai/Kimi-K2.7-Code-Highspeed`      | Kimi K2.7 Code HighSpeed    | open-source  | yes | 262K   |
 | `moonshotai/Kimi-K3`                       | Kimi K3                     | open-source  | yes | 1M     |
+| `meituan/LongCat-2.0`                      | LongCat 2.0                 | open-source  | yes | 1M     |
 | `xiaomi/mimo-v2.5`                         | MiMo V2.5                   | open-source  | no  | 1M     |
 | `xiaomi/mimo-v2.5-pro`                     | MiMo V2.5 Pro               | open-source  | no  | 1M     |
 | `MiniMaxAI/MiniMax-M2.5`                   | MiniMax M2.5                | open-source  | no  | 200K   |
