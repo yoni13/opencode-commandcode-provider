@@ -155,6 +155,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `gpt-5.6-terra`                            | GPT-5.6 Terra               | open-source  | yes | 1M     |
 | `xai/grok-4.5`                             | Grok 4.5                    | open-source  | yes | 500K   |
 | `xai/grok-4.6`                             | Grok 4.6                    | open-source  | yes | 500K   |
+| `xai/grok-4.7`                             | Grok 4.7                    | open-source  | yes | 500K   |
 | `thinkingmachines/inkling`                 | Inkling                     | open-source  | yes | 256K   |
 | `thinkingmachines/inkling-small`           | Inkling Small               | open-source  | yes | 1M     |
 | `moonshotai/Kimi-K2.5`                     | Kimi K2.5                   | open-source  | no  | 256K   |
@@ -165,6 +166,9 @@ Models that Command Code publishes with image input support are exposed to openc
 | `meituan/LongCat-2.0`                      | LongCat 2.0                 | open-source  | yes | 1M     |
 | `xiaomi/mimo-v2.5`                         | MiMo V2.5                   | open-source  | no  | 1M     |
 | `xiaomi/mimo-v2.5-pro`                     | MiMo V2.5 Pro               | open-source  | no  | 1M     |
+| `xiaomi/mimo-v2.6-flash`                   | MiMo V2.6 Flash             | open-source  | no  | 1M     |
+| `xiaomi/mimo-v2.6-pro`                     | MiMo V2.6 Pro               | open-source  | no  | 1M     |
+| `xiaomi/mimo-v2.6-pro-ultraspeed`          | MiMo V2.6 Pro UltraSpeed    | open-source  | no  | 1M     |
 | `MiniMaxAI/MiniMax-M2.5`                   | MiniMax M2.5                | open-source  | no  | 200K   |
 | `MiniMaxAI/MiniMax-M2.7`                   | MiniMax M2.7                | open-source  | no  | 1M     |
 | `MiniMaxAI/MiniMax-M3`                     | MiniMax M3                  | open-source  | yes | 1M     |
@@ -186,6 +190,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `Qwen/Qwen3.8-Omni-Flash`                  | Qwen 3.8 Omni Flash         | open-source  | yes | 1M     |
 | `stepfun/Step-3.5-Flash`                   | Step 3.5 Flash              | open-source  | yes | 1M     |
 | `stepfun/Step-3.7-Flash`                   | Step 3.7 Flash              | open-source  | yes | 256K   |
+| `stepfun/Step-5-Preview`                   | Step 5 Preview              | open-source  | yes | 1M     |
 | `tencent/hy3-paid`                         | Tencent Hy3                 | open-source  | yes | 262K   |
 | `tencent/hy4-preview`                      | Tencent Hy4 Preview         | open-source  | yes | 1M     |
 

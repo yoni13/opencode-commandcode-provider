@@ -1775,6 +1775,51 @@
     }
   },
   {
+    "id": "xai/grok-4.7",
+    "name": "Grok 4.7",
+    "tier": "open-source",
+    "reasoning": true,
+    "attachment": true,
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      },
+      "xhigh": {
+        "reasoningEffort": "xhigh"
+      }
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 500000,
+      "output": 65536
+    }
+  },
+  {
     "id": "thinkingmachines/inkling",
     "name": "Inkling",
     "tier": "open-source",
@@ -2035,6 +2080,81 @@
     },
     "limit": {
       "context": 1000000,
+      "output": 65536
+    }
+  },
+  {
+    "id": "xiaomi/mimo-v2.6-flash",
+    "name": "MiMo V2.6 Flash",
+    "tier": "open-source",
+    "reasoning": false,
+    "attachment": true,
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 1048576,
+      "output": 65536
+    }
+  },
+  {
+    "id": "xiaomi/mimo-v2.6-pro",
+    "name": "MiMo V2.6 Pro",
+    "tier": "open-source",
+    "reasoning": false,
+    "attachment": true,
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 1048576,
+      "output": 65536
+    }
+  },
+  {
+    "id": "xiaomi/mimo-v2.6-pro-ultraspeed",
+    "name": "MiMo V2.6 Pro UltraSpeed",
+    "tier": "open-source",
+    "reasoning": false,
+    "attachment": true,
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 1048576,
       "output": 65536
     }
   },
@@ -2755,6 +2875,47 @@
     },
     "limit": {
       "context": 256000,
+      "output": 65536
+    }
+  },
+  {
+    "id": "stepfun/Step-5-Preview",
+    "name": "Step 5 Preview",
+    "tier": "open-source",
+    "reasoning": true,
+    "attachment": true,
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "reasoning_efforts": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "variants": {
+      "low": {
+        "reasoningEffort": "low"
+      },
+      "medium": {
+        "reasoningEffort": "medium"
+      },
+      "high": {
+        "reasoningEffort": "high"
+      }
+    },
+    "tool_call": true,
+    "cost": {
+      "input": 0,
+      "output": 0
+    },
+    "limit": {
+      "context": 1000000,
       "output": 65536
     }
   },
