@@ -116,6 +116,7 @@ Models that Command Code publishes with image input support are exposed to openc
 | `claude-opus-4-7`                          | [Premium] Claude Opus 4.7   | premium      | yes | 1M     |
 | `claude-opus-4-8`                          | [Premium] Claude Opus 4.8   | premium      | yes | 1M     |
 | `claude-opus-5`                            | [Premium] Claude Opus 5     | premium      | yes | 1M     |
+| `claude-opus-5-5`                          | [Premium] Claude Opus 5.5   | premium      | yes | 1M     |
 | `claude-sonnet-4-6`                        | [Premium] Claude Sonnet 4.6 | premium      | yes | 1M     |
 | `claude-sonnet-5`                          | [Premium] Claude Sonnet 5   | premium      | yes | 1M     |
 | `google/gemini-3.1-flash-lite`             | [Premium] Gemini 3.1 Flash Lite | premium      | yes | 1M     |
@@ -129,6 +130,8 @@ Models that Command Code publishes with image input support are exposed to openc
 | `gpt-5.4-mini`                             | [Premium] GPT-5.4 Mini      | premium      | yes | 400K   |
 | `gpt-5.5`                                  | [Premium] GPT-5.5           | premium      | yes | 400K   |
 | `gpt-6-astra`                              | [Premium] GPT-6 Astra       | premium      | yes | 1M     |
+| `gpt-6-luna`                               | [Premium] GPT-6 Luna        | premium      | yes | 1M     |
+| `gpt-6-sol`                                | [Premium] GPT-6 Sol         | premium      | yes | 1M     |
 | `poolside/laguna-s-2.1-free`               | [Free] Laguna S 2.1         | open-source  | yes | 256K   |
 | `inclusionai/ling-3.0-flash-free`          | [Free] Ling 3.0 Flash       | open-source  | yes | 256K   |
 | `inclusionai/ling-3.0-flash-sante:free`    | [Free] Ling 3.0 Flash Sante | open-source  | yes | 262K   |
